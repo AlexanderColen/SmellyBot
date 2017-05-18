@@ -10,4 +10,11 @@ Currently SmellyBot has a few basic features that can be used.
 - Rolling random numbers.
 - Playing the slot machine with random outcome.
 
+### Commands
+- !roll [minimum]-[maximum]
+- !slots
+- !Hi / !HI / !hi
+- !Hello / !HELLO / !hello
+- !Dokus / !DOKUS / !dokus
+
 © 2017 - SmellyAlex
