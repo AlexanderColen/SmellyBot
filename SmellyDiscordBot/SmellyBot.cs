@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
+//TODO add documentation to all classes.
 namespace SmellyDiscordBot
 {
     public class SmellyBot
@@ -69,6 +70,7 @@ namespace SmellyDiscordBot
             #endregion
             #endregion
 
+            //TODO make this dynamic so it can be added to different channels when a command is called.
             #region Messages when user joins, gets banned/unbanned or leaves.
             client.UserJoined += async (s, e) => 
             {
@@ -97,7 +99,7 @@ namespace SmellyDiscordBot
                 await channel.SendMessage(string.Format("{0} has left the channel!", e.User.Name));
             };
             #endregion
-
+            //TODO make this dynamic so it can be added to different channels when a command is called.
             #region Channel creation/destruction
             client.ChannelCreated += async (s, e) =>
             {
@@ -113,7 +115,7 @@ namespace SmellyDiscordBot
                 await channel.SendMessage(string.Format("The channel named '{0}' has been deleted!", e.Channel.Name));
             };
             #endregion
-
+            //TODO make this dynamic so it can be added to different channels when a command is called.
             #region Role creation/destruction
             client.RoleCreated += async (s, e) =>
             {
@@ -136,6 +138,7 @@ namespace SmellyDiscordBot
             });
         }
 
+        //TODO do something with the outcome.
         private async Task SlotMachine(CommandEventArgs e)
         {
             var message = fetchUser(e) + " tries their luck at the slot machine...";

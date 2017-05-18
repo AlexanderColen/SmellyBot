@@ -17,3 +17,5 @@ D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\bin\Debug\RestSharp.xml
 D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\obj\Debug\SmellyDiscordBot.csprojResolveAssemblyReference.cache
 D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\obj\Debug\SmellyDiscordBot.exe
 D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\obj\Debug\SmellyDiscordBot.pdb
+D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\bin\Debug\SmellyDiscordBot.exe.CodeAnalysisLog.xml
+D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\bin\Debug\SmellyDiscordBot.exe.lastcodeanalysissucceeded
