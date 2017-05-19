@@ -31,46 +31,7 @@ namespace SmellyDiscordBot
 
             commands = client.GetService<CommandService>();
 
-            #region Adding basic commands with responses
-            #region Greetings
-            addCommand("Hello", "Hi!");
-            addCommand("hello", "Hi!");
-            addCommand("HELLO", "HI!");
-            addCommand("Hi", "Hello there, dokus");
-            addCommand("hi", "Hello there, dokus");
-            addCommand("HI", "Hello there, dokus");
-            #endregion
-            #region Love
-            addCommand("Love", "Alex :heart: Shivam");
-            addCommand("love", "Alex :heart: Shivam");
-            addCommand("LOVE", "Alex :heart: Shivam");
-            #endregion
-            #region Dokus
-            addCommand("Dokus", "Do you mean yourself?");
-            addCommand("dokus", "Do you mean yourself?");
-            addCommand("DOKUS", "No need to yell, dokus!");
-            #endregion
-            #endregion
-
-            #region Slot machine
-            commands.CreateCommand("slots").Do(async(e) =>
-            {
-                await SlotMachine(e);
-            });
-            #endregion
-
-            #region Adding commands with parameters
-            #region Random roll
-            commands.CreateCommand("roll").Parameter("message", ParameterType.Required).Do(async (e) =>
-            {
-                await Roll(e);
-            });
-            commands.CreateCommand("roll").Parameter("message", ParameterType.Multiple).Do(async (e) =>
-            {
-                await e.Channel.SendMessage("Inproper use of the command '!roll'. It should look like this: '!roll 1-5'.");
-            });
-            #endregion
-            #endregion
+            AddAllCommands();
 
             //TODO make this dynamic so it can be added to different channels when a command is called.
             #region Messages when user joins, gets banned/unbanned or leaves.
@@ -149,7 +110,7 @@ namespace SmellyDiscordBot
         /// and a final message that says something about the outcome.</returns>
         private async Task SlotMachine(CommandEventArgs e)
         {
-            var message = fetchUser(e) + " tries their luck at the slot machine...";
+            var message = FetchUser(e) + " tries their luck at the slot machine...";
             await e.Channel.SendMessage(message);
 
             try {
@@ -162,7 +123,7 @@ namespace SmellyDiscordBot
                 //TODO do something with the outcome.
                 if (enum1.Equals(enum2) && enum2.Equals(enum3))
                 {
-                    await e.Channel.SendMessage(string.Format("{0} has hit the jackpot!", fetchUser(e)));
+                    await e.Channel.SendMessage(string.Format("{0} has hit the jackpot!", FetchUser(e)));
                 }
                 else if (enum1.Equals(enum2) || enum2.Equals(enum3) || enum1.Equals(enum3))
                 {
@@ -170,7 +131,7 @@ namespace SmellyDiscordBot
                 }
                 else
                 {
-                    await e.Channel.SendMessage(string.Format("Better luck next time, {0}...", fetchUser(e)));
+                    await e.Channel.SendMessage(string.Format("Better luck next time, {0}...", FetchUser(e)));
                 }
             } catch (Exception ex)
             {
@@ -186,12 +147,7 @@ namespace SmellyDiscordBot
         /// In case of a failed input, returns a error message that the command was used wrongly.</returns>
         private async Task Roll(CommandEventArgs e)
         {
-            var input = "";
-
-            for (int i = 0; i < e.Args.Length; i++)
-            {
-                input += e.Args[i] + " ";
-            }
+            var input = ReturnInputParameterString(e);
 
             try {
                 var minimum = Convert.ToInt32(input.Substring(0, input.IndexOf("-")));
@@ -200,7 +156,7 @@ namespace SmellyDiscordBot
                 Random rand = new Random();
 
                 var outcome = rand.Next(minimum, maximum);
-                await e.Channel.SendMessage(fetchUser(e) + " rolled a " + outcome);
+                await e.Channel.SendMessage(string.Format("{0} rolled a {1}.", FetchUser(e), outcome));
             } catch (Exception ex)
             {
                 Console.WriteLine(ex.GetBaseException());
@@ -223,7 +179,7 @@ namespace SmellyDiscordBot
         /// </summary>
         /// <param name="command">The command name that needs to be created.</param>
         /// <param name="response">The response that will be given when that command is called.</param>
-        private void addCommand(string command, string response)
+        private void AddCommand(string command, string response)
         {
             commands.CreateCommand(command).Do(async (e) =>
             {
@@ -232,13 +188,77 @@ namespace SmellyDiscordBot
         }
 
         /// <summary>
+        /// Adds all commands to the commandservice.
+        /// </summary>
+        private void AddAllCommands()
+        {
+            #region Adding basic commands with responses
+            #region Greetings
+            AddCommand("Hello", "Hi!");
+            AddCommand("hello", "Hi!");
+            AddCommand("HELLO", "HI!");
+            AddCommand("Hi", "Hello there, dokus");
+            AddCommand("hi", "Hello there, dokus");
+            AddCommand("HI", "Hello there, dokus");
+            #endregion
+            #region Love
+            AddCommand("Love", "Alex :heart: Shivam");
+            AddCommand("love", "Alex :heart: Shivam");
+            AddCommand("LOVE", "Alex :heart: Shivam");
+            #endregion
+            #region Dokus
+            AddCommand("Dokus", "Do you mean yourself?");
+            AddCommand("dokus", "Do you mean yourself?");
+            AddCommand("DOKUS", "No need to yell, dokus!");
+            #endregion
+            #endregion
+            AddCommand("test", "<:chiya:299559728307109888>");
+            #region Slot machine
+            commands.CreateCommand("slots").Do(async (e) =>
+            {
+                await SlotMachine(e);
+            });
+            #endregion
+
+            #region Adding commands with parameters
+            #region Random roll
+            commands.CreateCommand("roll").Parameter("message", ParameterType.Required).Do(async (e) =>
+            {
+                await Roll(e);
+            });
+            commands.CreateCommand("roll").Parameter("message", ParameterType.Multiple).Do(async (e) =>
+            {
+                await e.Channel.SendMessage("Inproper use of the command '!roll'. It should look like this: '!roll 1-5'.");
+            });
+            #endregion
+            #endregion
+        }
+
+        /// <summary>
         /// Fetch the user from the command event.
         /// </summary>
         /// <param name="e">The command event which was executed.</param>
         /// <returns>The nickname of the user if the user has one, otherwise returns the name.</returns>
-        private string fetchUser(CommandEventArgs e)
+        private string FetchUser(CommandEventArgs e)
         {
             return e.User.Nickname != null ? e.User.Nickname : e.User.Name;
+        }
+
+        /// <summary>
+        /// Converts the added argument(s) to a string.
+        /// </summary>
+        /// <param name="e">The command event which was executed.</param>
+        /// <returns>The parameters that were added to the command.</returns>
+        private string ReturnInputParameterString(CommandEventArgs e)
+        {
+            var input = "";
+
+            for (int i = 0; i < e.Args.Length; i++)
+            {
+                input += e.Args[i] + " ";
+            }
+
+            return input.ToString();
         }
     }
 }
