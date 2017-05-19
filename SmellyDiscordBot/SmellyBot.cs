@@ -4,7 +4,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-//TODO add documentation to all classes.
 namespace SmellyDiscordBot
 {
     public class SmellyBot
@@ -12,7 +11,9 @@ namespace SmellyDiscordBot
         DiscordClient client;
         CommandService commands;
 
-
+        /// <summary>
+        /// Constructor of SmellyBot. Connection with client, prefix and commands are set here.
+        /// </summary>
         public SmellyBot()
         {
             client = new DiscordClient(input =>
@@ -139,7 +140,13 @@ namespace SmellyDiscordBot
             });
         }
 
-        //TODO do something with the outcome.
+        /// <summary>
+        /// Fakes a slot machine with emojis to the user.
+        /// </summary>
+        /// <param name="e">The command event which was executed.</param>
+        /// <returns>A message in the channel that specifies which user tried to spin, 
+        /// another one with the outcome of the spin, 
+        /// and a final message that says something about the outcome.</returns>
         private async Task SlotMachine(CommandEventArgs e)
         {
             var message = fetchUser(e) + " tries their luck at the slot machine...";
@@ -152,6 +159,7 @@ namespace SmellyDiscordBot
                 var enum3 = SlotMachineEnum.GetRandomOutcome(rand);
                 await e.Channel.SendMessage(string.Format(":{0}: - :{1}: - :{2}:", enum1, enum2, enum3));
 
+                //TODO do something with the outcome.
                 if (enum1.Equals(enum2) && enum2.Equals(enum3))
                 {
                     await e.Channel.SendMessage(string.Format("{0} has hit the jackpot!", fetchUser(e)));
@@ -170,6 +178,12 @@ namespace SmellyDiscordBot
             }
         }
 
+        /// <summary>
+        /// Rolls two random numbers between a minimum and maximum that was separated by a dash.
+        /// </summary>
+        /// <param name="e">The command event which was executed.</param>
+        /// <returns>A message in the channel with a random number, taking into account the input and output.
+        /// In case of a failed input, returns a error message that the command was used wrongly.</returns>
         private async Task Roll(CommandEventArgs e)
         {
             var input = "";
@@ -194,11 +208,21 @@ namespace SmellyDiscordBot
             }
         }
 
+        /// <summary>
+        /// Logs the event in the console.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event that was executed.</param>
         private void Log(object sender, LogMessageEventArgs e)
         {
             Console.WriteLine(e.Message);
         }
 
+        /// <summary>
+        /// Creates a basic command with a basic response.
+        /// </summary>
+        /// <param name="command">The command name that needs to be created.</param>
+        /// <param name="response">The response that will be given when that command is called.</param>
         private void addCommand(string command, string response)
         {
             commands.CreateCommand(command).Do(async (e) =>
@@ -207,6 +231,11 @@ namespace SmellyDiscordBot
             });
         }
 
+        /// <summary>
+        /// Fetch the user from the command event.
+        /// </summary>
+        /// <param name="e">The command event which was executed.</param>
+        /// <returns>The nickname of the user if the user has one, otherwise returns the name.</returns>
         private string fetchUser(CommandEventArgs e)
         {
             return e.User.Nickname != null ? e.User.Nickname : e.User.Name;
