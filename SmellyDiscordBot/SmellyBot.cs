@@ -21,6 +21,7 @@ namespace SmellyDiscordBot
                 input.LogHandler = Log;
             });
 
+            //TODO allow owner to customize the prefix.
             client.UsingCommands(input =>
             {
                 input.PrefixChar = '!';
