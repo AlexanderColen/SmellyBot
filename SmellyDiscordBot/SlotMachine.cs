@@ -2,7 +2,7 @@
 
 namespace SmellyDiscordBot
 {
-    public static class SlotMachineEnum
+    public static class SlotMachine
     {
         enum Outcomes
         {
