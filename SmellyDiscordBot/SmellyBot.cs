@@ -18,6 +18,8 @@ namespace SmellyDiscordBot
 
         string eventsChannel = "bot-testing";
         string welcomeChannel = "welcome";
+
+        char prefix = '!';
         #endregion
 
         private enum eventType
@@ -42,7 +44,7 @@ namespace SmellyDiscordBot
             //TODO allow owner to customize the prefix with properties file.
             client.UsingCommands(input =>
             {
-                input.PrefixChar = '!';
+                input.PrefixChar = prefix;
                 input.AllowMentionPrefix = true;
             });
 
@@ -51,77 +53,14 @@ namespace SmellyDiscordBot
             AddAllCommands();
 
             //TODO fetch the channel values from properties file.
-            toggleEvents(eventType.user);
-            toggleEvents(eventType.channel);
-            toggleEvents(eventType.role);
-            
+            ToggleEvents(eventType.user);
+            ToggleEvents(eventType.channel);
+            ToggleEvents(eventType.role);
+
             client.ExecuteAndWait(async () =>
             {
                 await client.Connect("MzE0ODIwMjU5NDE4OTk2NzM2.DAYcvg.vDWGavl5N7hr7WRnvgGa14J6d3s", TokenType.Bot);
             });
-        }
-
-        /// <summary>
-        /// Fakes a slot machine with emojis to the user.
-        /// </summary>
-        /// <param name="e">The command event which was executed.</param>
-        /// <returns>A message in the channel that specifies which user tried to spin, 
-        /// another one with the outcome of the spin, 
-        /// and a final message that says something about the outcome.</returns>
-        private async Task SlotMachine(CommandEventArgs e)
-        {
-            var message = FetchUser(e) + " tries their luck at the slot machine...";
-            await e.Channel.SendMessage(message);
-
-            try {
-                Random rand = new Random(new Random().Next(10000));
-                var enum1 = SmellyDiscordBot.SlotMachine.GetRandomOutcome(rand);
-                var enum2 = SmellyDiscordBot.SlotMachine.GetRandomOutcome(rand);
-                var enum3 = SmellyDiscordBot.SlotMachine.GetRandomOutcome(rand);
-                await e.Channel.SendMessage(string.Format(":{0}: - :{1}: - :{2}:", enum1, enum2, enum3));
-
-                //TODO do something with the outcome.
-                if (enum1.Equals(enum2) && enum2.Equals(enum3))
-                {
-                    await e.Channel.SendMessage(string.Format("{0} has hit the jackpot!", FetchUser(e)));
-                }
-                else if (enum1.Equals(enum2) || enum2.Equals(enum3) || enum1.Equals(enum3))
-                {
-                    await e.Channel.SendMessage("So close, yet so far.");
-                }
-                else
-                {
-                    await e.Channel.SendMessage(string.Format("Better luck next time, {0}...", FetchUser(e)));
-                }
-            } catch (Exception ex)
-            {
-                Console.WriteLine(ex.GetBaseException());
-            }
-        }
-
-        /// <summary>
-        /// Rolls two random numbers between a minimum and maximum that was separated by a dash.
-        /// </summary>
-        /// <param name="e">The command event which was executed.</param>
-        /// <returns>A message in the channel with a random number, taking into account the input and output.
-        /// In case of a failed input, returns an error message that the command was wrongly used.</returns>
-        private async Task Roll(CommandEventArgs e)
-        {
-            var input = ReturnInputParameterString(e);
-
-            try {
-                var minimum = Convert.ToInt32(input.Substring(0, input.IndexOf("-")));
-                var maximum = Convert.ToInt32(input.Remove(0, minimum.ToString().Length + 1));
-
-                Random rand = new Random();
-
-                var outcome = rand.Next(minimum, maximum);
-                await e.Channel.SendMessage(string.Format("{0} rolled a {1}.", FetchUser(e), outcome));
-            } catch (Exception ex)
-            {
-                Console.WriteLine(ex.GetBaseException());
-                await e.Channel.SendMessage("Inproper use of the command '!roll'. It should look like this: '!roll 1-5'.");
-            }
         }
 
         /// <summary>
@@ -130,37 +69,38 @@ namespace SmellyDiscordBot
         /// <param name="e">The command event which was executed.</param>
         /// <returns>A message in the channel that the events have been changed.
         /// In case of a failed input, returns an error message that the command was wrongly used.</returns>
-        private async Task toggleSpecificEvent(CommandEventArgs e)
+        private async Task ToggleSpecificEvent(CommandEventArgs e)
         {
             try
             {
-                string input = ReturnInputParameterString(e);
+                string[] input = General.ReturnInputParameterStringArray(e);
 
-                string firstParameter = input.Substring(0, input.IndexOf(' '));
-                input = input.TrimStart(firstParameter.ToCharArray());
-                input = input.TrimStart(' ');
-                string secondParameter = input.Substring(0, input.IndexOf(' '));
-                input = input.TrimStart(secondParameter.ToCharArray());
+                string firstParameter = input[0];
+                string secondParameter = input[1];
 
                 //Meaning that there are more given parameters than necessary.
-                if (input.Length != 1)
+                if (input.Length >= 3)
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new UnusedParametersException("Too many parameters were given.");
+                }
+                else if (input.Length <= 1)
+                {
+                    throw new UnusedParametersException("Too few parameters were given.");
                 }
 
                 eventType eventtype = eventType.none;
 
-                if (e.Command.Text.Contains("User"))
+                if (e.Command.Text.Contains("user"))
                 {
                     eventtype = eventType.user;
                     toggleUserEvents = !toggleUserEvents;
                 }
-                else if (e.Command.Text.Contains("Channel"))
+                else if (e.Command.Text.Contains("channel"))
                 {
                     eventtype = eventType.channel;
                     toggleChannelEvents = !toggleChannelEvents;
                 }
-                else if (e.Command.Text.Contains("Role"))
+                else if (e.Command.Text.Contains("role"))
                 {
                     eventtype = eventType.role;
                     toggleRoleEvents = !toggleRoleEvents;
@@ -168,21 +108,71 @@ namespace SmellyDiscordBot
                 welcomeChannel = firstParameter;
                 eventsChannel = secondParameter;
 
-                if (eventtype != eventType.none) {
-                    await e.Channel.SendMessage(toggleEvents(eventtype));
+                if (eventtype != eventType.none)
+                {
+                    await e.Channel.SendMessage(ToggleEvents(eventtype));
                 }
                 else
                 {
-                    throw new ApplicationException();
+                    throw new UnknownEventException("Event not found.");
                 }
-            } catch (ArgumentOutOfRangeException aor)
+            }
+            catch (UnusedParametersException upe)
             {
-                Console.WriteLine(aor.GetBaseException());
-                await e.Channel.SendMessage("Inproper use of the command '!toggle<EVENT>'. It should look like this: '!toggle<EVENT> welcome server-updates'.");
-            } catch (ApplicationException appex)
+                Console.WriteLine(upe.Message);
+                await General.InproperCommandUsageMessage(e, "toggle<EVENT>", "!toggle<EVENT> <CHANNELNAME> <CHANNELNAME>");
+            }
+            catch (UnknownEventException uee)
             {
-                Console.WriteLine(appex.GetBaseException());
+                Console.WriteLine(uee.Message);
                 await e.Channel.SendMessage("Something went wrong that shouldn't have went wrong...");
+            }
+        }
+
+        /// <summary>
+        /// Adds a basic command with a response.
+        /// </summary>
+        /// <param name="e">The command event which was executed.</param>
+        /// <returns>A message that shows if the command was successfully added or not.</returns>
+        private async Task AddCommand(CommandEventArgs e)
+        {
+            string[] input = General.ReturnInputParameterStringArray(e);
+
+            string command = input[0];
+            string response = "";
+            
+            for (int i = 1; i<input.Length; i++)
+            {
+                response += input[i] + " ";
+            }
+
+            if (input.Length <= 1)
+            {
+                throw new UnusedParametersException("Too few parameters were given.");
+            }
+
+            foreach (Command c in commands.AllCommands)
+            {
+                if (c.Text.Contains(command))
+                {
+                    throw new DuplicateCommandException("Duplicate command attempted to be added.");
+                }
+            }
+
+            try
+            {
+                AddCommand(command, response);
+                await e.Channel.SendMessage(string.Format("Succesfully added the *{0}{1}* command!", prefix, command));
+            }
+            catch (DuplicateCommandException dce)
+            {
+                Console.WriteLine(dce.Message);
+                await e.Channel.SendMessage(dce.Message);
+            }
+            catch (UnusedParametersException upe)
+            {
+                Console.WriteLine(upe.Message);
+                await General.InproperCommandUsageMessage(e, "addcommand", "!addcommand <NAME> <RESPONSE>");
             }
         }
 
@@ -233,107 +223,86 @@ namespace SmellyDiscordBot
             AddCommand("dokus", "Do you mean yourself?");
             AddCommand("DOKUS", "No need to yell, dokus!");
             #endregion
+            //AddCommand("test", "<:chiya:299559728307109888>");
             #endregion
-            AddCommand("test", "<:chiya:299559728307109888>");
-            #region Slot machine
+            #region Slot Machine
             commands.CreateCommand("slots").Do(async (e) =>
             {
-                await SlotMachine(e);
+                await Casino.Slots(e);
             });
             #endregion
-            #region Disconnect command
+            #region Disconnect Command
             commands.CreateCommand("disconnect").Do(async (e) =>
             {
                 await client.Disconnect();
             });
             #endregion
-            #region Random roll
+            #region Random Roll
             commands.CreateCommand("roll").Parameter("message", ParameterType.Required).Do(async (e) =>
             {
-                await Roll(e);
+                await Casino.Roll(e);
             });
             commands.CreateCommand("roll").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
-                await e.Channel.SendMessage("Inproper use of the command '!roll'. It should look like this: '!roll 1-5'.");
+                await General.InproperCommandUsageMessage(e, "roll", "!roll <MINVALUE>-<MAXVALUE>");
             });
             #endregion
             #region Toggle Events
-            commands.CreateCommand("toggleAll").Do(async (e) =>
+            commands.CreateCommand("toggleall").Do(async (e) =>
             {
                 toggleUserEvents = !toggleUserEvents;
                 toggleChannelEvents = !toggleChannelEvents;
                 toggleRoleEvents = !toggleRoleEvents;
-                await e.Channel.SendMessage(toggleEvents(eventType.user));
-                await e.Channel.SendMessage(toggleEvents(eventType.channel));
-                await e.Channel.SendMessage(toggleEvents(eventType.role));
+                await e.Channel.SendMessage(ToggleEvents(eventType.user));
+                await e.Channel.SendMessage(ToggleEvents(eventType.channel));
+                await e.Channel.SendMessage(ToggleEvents(eventType.role));
             });
-            commands.CreateCommand("toggleUser").Do(async (e) => 
+            commands.CreateCommand("toggleuser").Do(async (e) =>
             {
                 toggleUserEvents = !toggleUserEvents;
-                await e.Channel.SendMessage(toggleEvents(eventType.user));
+                await e.Channel.SendMessage(ToggleEvents(eventType.user));
             });
-            commands.CreateCommand("toggleChannel").Do(async (e) =>
+            commands.CreateCommand("togglechannel").Do(async (e) =>
             {
                 toggleChannelEvents = !toggleChannelEvents;
-                await e.Channel.SendMessage(toggleEvents(eventType.channel));
+                await e.Channel.SendMessage(ToggleEvents(eventType.channel));
             });
-            commands.CreateCommand("toggleRole").Do(async (e) =>
+            commands.CreateCommand("togglerole").Do(async (e) =>
             {
                 toggleRoleEvents = !toggleRoleEvents;
-                await e.Channel.SendMessage(toggleEvents(eventType.role));
+                await e.Channel.SendMessage(ToggleEvents(eventType.role));
             });
-            commands.CreateCommand("toggleUser").Parameter("message", ParameterType.Multiple).Do(async (e) =>
+            commands.CreateCommand("toggleuser").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
-                await toggleSpecificEvent(e);
+                await ToggleSpecificEvent(e);
             });
-            commands.CreateCommand("toggleUser").Parameter("message", ParameterType.Required).Do(async (e) =>
+            commands.CreateCommand("toggleuser").Parameter("message", ParameterType.Required).Do(async (e) =>
             {
-                await e.Channel.SendMessage("Inproper use of the command '!toggleUser'. It should look like this: '!toggleUser welcome server-updates'.");
+                await General.InproperCommandUsageMessage(e, "toggle<EVENT>", "!toggle<EVENT> <CHANNELNAME> <CHANNELNAME>");
             });
-            commands.CreateCommand("toggleChannel").Parameter("message", ParameterType.Multiple).Do(async (e) =>
+            commands.CreateCommand("togglechannel").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
-                await toggleSpecificEvent(e);
+                await ToggleSpecificEvent(e);
             });
-            commands.CreateCommand("toggleChannel").Parameter("message", ParameterType.Required).Do(async (e) =>
+            commands.CreateCommand("togglechannel").Parameter("message", ParameterType.Required).Do(async (e) =>
             {
-                await e.Channel.SendMessage("Inproper use of the command '!toggleChannel'. It should look like this: '!toggleChannel welcome server-updates'.");
+                await General.InproperCommandUsageMessage(e, "toggle<EVENT>", "!toggle<EVENT> <CHANNELNAME> <CHANNELNAME>");
             });
-            commands.CreateCommand("toggleRole").Parameter("message", ParameterType.Multiple).Do(async (e) =>
+            commands.CreateCommand("togglerole").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
-                await toggleSpecificEvent(e);
+                await ToggleSpecificEvent(e);
             });
-            commands.CreateCommand("toggleRole").Parameter("message", ParameterType.Required).Do(async (e) =>
+            commands.CreateCommand("togglerole").Parameter("message", ParameterType.Required).Do(async (e) =>
             {
-                await e.Channel.SendMessage("Inproper use of the command '!toggleRole'. It should look like this: '!toggleRole welcome server-updates'.");
+                await General.InproperCommandUsageMessage(e, "toggle<EVENT>", "!toggle<EVENT> <CHANNELNAME> <CHANNELNAME>");
             });
             #endregion
-        }
-
-        /// <summary>
-        /// Fetch the user from the command event.
-        /// </summary>
-        /// <param name="e">The command event which was executed.</param>
-        /// <returns>The nickname of the user if the user has one, otherwise returns the name.</returns>
-        private string FetchUser(CommandEventArgs e)
-        {
-            return e.User.Nickname != null ? e.User.Nickname : e.User.Name;
-        }
-
-        /// <summary>
-        /// Converts the added argument(s) to a string.
-        /// </summary>
-        /// <param name="e">The command event which was executed.</param>
-        /// <returns>The parameters that were added to the command.</returns>
-        private string ReturnInputParameterString(CommandEventArgs e)
-        {
-            string input = "";
-
-            for (int i = 0; i < e.Args.Length; i++)
+            #region Create Basic Command
+            commands.CreateCommand("addcommand").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
-                input += e.Args[i] + " ";
-            }
-
-            return input;
+                await AddCommand(e);
+            });
+            #endregion
         }
 
         /// <summary>
@@ -342,7 +311,7 @@ namespace SmellyDiscordBot
         /// <param name="eventType">The type of the events.</param>
         /// <param name="welcomeChannel">The channel where welcome messages should be posted.</param>
         /// <param name="eventsChannel">Channel where the rest should be posted.</param>
-        private string toggleEvents(eventType eventType) 
+        private string ToggleEvents(eventType eventType)
         {
             switch (eventType)
             {
