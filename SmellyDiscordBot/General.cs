@@ -1,4 +1,5 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using System.Threading.Tasks;
 
 namespace SmellyDiscordBot
@@ -10,7 +11,7 @@ namespace SmellyDiscordBot
         /// </summary>
         /// <param name="e">The command event which was executed.</param>
         /// <returns>The nickname of the user if the user has one, otherwise returns the name.</returns>
-        public static string FetchUser(CommandEventArgs e)
+        public static string FetchUserName(CommandEventArgs e)
         {
             return e.User.Nickname != null ? e.User.Nickname : e.User.Name;
         }
@@ -42,6 +43,47 @@ namespace SmellyDiscordBot
         public static async Task InproperCommandUsageMessage(CommandEventArgs e, string commandname, string usage)
         {
             await e.Channel.SendMessage(string.Format("Inproper use of the command *!{0}*. It should look like this: *{1}*.", commandname, usage));
+        }
+
+        /// <summary>
+        /// Assigns a role to the user.
+        /// </summary>
+        /// <param name="e">The command event which was executed.</param>
+        /// <returns>Gives the user the requested role.</returns>
+        public static async Task AssignRole(CommandEventArgs e)
+        {
+            string[] input = General.ReturnInputParameterStringArray(e);
+            for (int i = 0; i < input.Length; i++)
+            {
+                foreach (Role r in e.Server.FindRoles(input[i]))
+                {
+                    System.Threading.Thread.Sleep(500);
+                    await e.User.AddRoles(r);
+                }
+            }
+
+            await e.Channel.SendMessage(string.Format("The role(s) have been assigned, *{0}*.", General.FetchUserName(e)));
+        }
+
+        /// <summary>
+        /// Removes a role from the user.
+        /// </summary>
+        /// <param name="e">The command event which was executed.</param>
+        /// <returns>Removes the role from the user.</returns>
+        public static async Task RemoveRole(CommandEventArgs e)
+        {
+            string[] input = General.ReturnInputParameterStringArray(e);
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                foreach (Role r in e.Server.FindRoles(input[i]))
+                {
+                    System.Threading.Thread.Sleep(500);
+                    await e.User.RemoveRoles(r);
+                }
+            }
+
+            await e.Channel.SendMessage(string.Format("The role(s) have been removed, *{0}*.", General.FetchUserName(e)));
         }
     }
 }

@@ -18,7 +18,7 @@ namespace SmellyDiscordBot
             heartpulse,
             x
         }
-        
+
         /// <summary>
         /// Gets a random enum.
         /// </summary>
@@ -39,7 +39,7 @@ namespace SmellyDiscordBot
         /// and a final message that says something about the outcome.</returns>
         public static async Task Slots(CommandEventArgs e)
         {
-            string user = General.FetchUser(e);
+            string user = General.FetchUserName(e);
             await e.Channel.SendMessage(string.Format("*{0}* tries their luck at the slot machine...", user));
 
             try
@@ -79,27 +79,30 @@ namespace SmellyDiscordBot
         /// In case of a failed input, returns an error message that the command was wrongly used.</returns>
         public static async Task Roll(CommandEventArgs e)
         {
-            if (General.ReturnInputParameterStringArray(e).Length >= 2)
-            {
-                throw new UnusedParametersException("Too many parameters were given.");
-            }
-
-            var input = General.ReturnInputParameterStringArray(e)[0];
-
             try
             {
+                if (General.ReturnInputParameterStringArray(e).Length >= 2)
+                {
+                    throw new UnusedParametersException("Too many parameters were given.");
+                }
+                var input = General.ReturnInputParameterStringArray(e)[0];
                 var minimum = Convert.ToInt32(input.Substring(0, input.IndexOf("-")));
                 var maximum = Convert.ToInt32(input.Remove(0, minimum.ToString().Length + 1));
 
                 Random rand = new Random();
 
                 var outcome = rand.Next(minimum, maximum);
-                await e.Channel.SendMessage(string.Format("*{0}* rolled a **{1}**.", General.FetchUser(e), outcome));
+                await e.Channel.SendMessage(string.Format("*{0}* rolled a **{1}**.", General.FetchUserName(e), outcome));
             }
-            catch (Exception ex) when (ex is UnusedParametersException || ex is ArgumentException)
+            catch (Exception ex) when (ex is UnusedParametersException || ex is ArgumentException || ex is FormatException)
             {
                 Console.WriteLine(ex.Message);
                 await General.InproperCommandUsageMessage(e, "roll", "!roll <MINVALUE>-<MAXVALUE>");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                await e.Channel.SendMessage("Something went wrong that shouldn't have went wrong...");
             }
         }
     }

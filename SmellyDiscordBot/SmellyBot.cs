@@ -117,12 +117,12 @@ namespace SmellyDiscordBot
                     throw new UnknownEventException("Event not found.");
                 }
             }
-            catch (UnusedParametersException upe)
+            catch (Exception ex) when (ex is UnusedParametersException || ex is IndexOutOfRangeException)
             {
-                Console.WriteLine(upe.Message);
+                Console.WriteLine(ex.Message);
                 await General.InproperCommandUsageMessage(e, "toggle<EVENT>", "!toggle<EVENT> <CHANNELNAME> <CHANNELNAME>");
             }
-            catch (UnknownEventException uee)
+            catch (Exception uee)
             {
                 Console.WriteLine(uee.Message);
                 await e.Channel.SendMessage("Something went wrong that shouldn't have went wrong...");
@@ -205,22 +205,9 @@ namespace SmellyDiscordBot
         private void AddAllCommands()
         {
             #region Adding basic commands with responses
-            #region Greetings
-            AddCommand("Hello", "Hi!");
-            AddCommand("hello", "Hi!");
-            AddCommand("HELLO", "HI!");
-            AddCommand("Hi", "Hello there, dokus");
-            AddCommand("hi", "Hello there, dokus");
-            AddCommand("HI", "Hello there, dokus");
-            #endregion
-            #region Love
-            AddCommand("Love", "Alex :heart: Shivam");
-            AddCommand("love", "Alex :heart: Shivam");
-            AddCommand("LOVE", "Alex :heart: Shivam");
-            #endregion
             #region Dokus
-            AddCommand("Dokus", "Do you mean yourself?");
-            AddCommand("dokus", "Do you mean yourself?");
+            AddCommand("Dokus", "Did you mean yourself?");
+            AddCommand("dokus", "Did you mean yourself?");
             AddCommand("DOKUS", "No need to yell, dokus!");
             #endregion
             //AddCommand("test", "<:chiya:299559728307109888>");
@@ -234,17 +221,14 @@ namespace SmellyDiscordBot
             #region Disconnect Command
             commands.CreateCommand("disconnect").Do(async (e) =>
             {
+                await e.Channel.SendMessage(string.Format("{0} signing out.", client.CurrentUser.Name));
                 await client.Disconnect();
             });
             #endregion
             #region Random Roll
-            commands.CreateCommand("roll").Parameter("message", ParameterType.Required).Do(async (e) =>
-            {
-                await Casino.Roll(e);
-            });
             commands.CreateCommand("roll").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
-                await General.InproperCommandUsageMessage(e, "roll", "!roll <MINVALUE>-<MAXVALUE>");
+                await Casino.Roll(e);
             });
             #endregion
             #region Toggle Events
@@ -276,31 +260,29 @@ namespace SmellyDiscordBot
             {
                 await ToggleSpecificEvent(e);
             });
-            commands.CreateCommand("toggleuser").Parameter("message", ParameterType.Required).Do(async (e) =>
-            {
-                await General.InproperCommandUsageMessage(e, "toggle<EVENT>", "!toggle<EVENT> <CHANNELNAME> <CHANNELNAME>");
-            });
             commands.CreateCommand("togglechannel").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
                 await ToggleSpecificEvent(e);
             });
-            commands.CreateCommand("togglechannel").Parameter("message", ParameterType.Required).Do(async (e) =>
-            {
-                await General.InproperCommandUsageMessage(e, "toggle<EVENT>", "!toggle<EVENT> <CHANNELNAME> <CHANNELNAME>");
-            });
             commands.CreateCommand("togglerole").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
                 await ToggleSpecificEvent(e);
-            });
-            commands.CreateCommand("togglerole").Parameter("message", ParameterType.Required).Do(async (e) =>
-            {
-                await General.InproperCommandUsageMessage(e, "toggle<EVENT>", "!toggle<EVENT> <CHANNELNAME> <CHANNELNAME>");
             });
             #endregion
             #region Create Basic Command
             commands.CreateCommand("addcommand").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
                 await AddCommand(e);
+            });
+            #endregion
+            #region Request Role Addition/Removal
+            commands.CreateCommand("assignrole").Parameter("message", ParameterType.Multiple).Do(async (e) =>
+            {
+                await General.AssignRole(e);
+            });
+            commands.CreateCommand("removerole").Parameter("message", ParameterType.Multiple).Do(async (e) =>
+            {
+                await General.RemoveRole(e);
             });
             #endregion
         }
