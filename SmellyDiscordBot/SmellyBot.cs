@@ -73,7 +73,7 @@ namespace SmellyDiscordBot
         {
             try
             {
-                string[] input = General.ReturnInputParameterStringArray(e);
+                string[] input = Utils.ReturnInputParameterStringArray(e);
 
                 string firstParameter = input[0];
                 string secondParameter = input[1];
@@ -120,7 +120,7 @@ namespace SmellyDiscordBot
             catch (Exception ex) when (ex is UnusedParametersException || ex is IndexOutOfRangeException)
             {
                 Console.WriteLine(ex.Message);
-                await General.InproperCommandUsageMessage(e, "toggle<EVENT>", "!toggle<EVENT> <CHANNELNAME> <CHANNELNAME>");
+                await Utils.InproperCommandUsageMessage(e, "toggle<EVENT>", "!toggle<EVENT> <CHANNELNAME> <CHANNELNAME>");
             }
             catch (Exception uee)
             {
@@ -136,7 +136,7 @@ namespace SmellyDiscordBot
         /// <returns>A message that shows if the command was successfully added or not.</returns>
         private async Task AddCommand(CommandEventArgs e)
         {
-            string[] input = General.ReturnInputParameterStringArray(e);
+            string[] input = Utils.ReturnInputParameterStringArray(e);
 
             string command = input[0];
             string response = "";
@@ -172,7 +172,7 @@ namespace SmellyDiscordBot
             catch (UnusedParametersException upe)
             {
                 Console.WriteLine(upe.Message);
-                await General.InproperCommandUsageMessage(e, "addcommand", "!addcommand <NAME> <RESPONSE>");
+                await Utils.InproperCommandUsageMessage(e, "addcommand", "!addcommand <NAME> <RESPONSE>");
             }
         }
 
@@ -278,11 +278,11 @@ namespace SmellyDiscordBot
             #region Request Role Addition/Removal
             commands.CreateCommand("assignrole").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
-                await General.AssignRole(e);
+                await Utils.AssignRole(e);
             });
             commands.CreateCommand("removerole").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
-                await General.RemoveRole(e);
+                await Utils.RemoveRole(e);
             });
             #endregion
         }

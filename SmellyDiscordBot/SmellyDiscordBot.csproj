@@ -75,14 +75,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="UnknownEventException.cs" />
-    <Compile Include="DuplicateCommandException.cs" />
-    <Compile Include="General.cs" />
+    <Compile Include="Exceptions\UnknownEventException.cs" />
+    <Compile Include="Exceptions\DuplicateCommandException.cs" />
+    <Compile Include="Utils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Casino.cs" />
     <Compile Include="SmellyBot.cs" />
-    <Compile Include="UnusedParametersException.cs" />
+    <Compile Include="Exceptions\UnusedParametersException.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

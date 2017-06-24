@@ -39,7 +39,7 @@ namespace SmellyDiscordBot
         /// and a final message that says something about the outcome.</returns>
         public static async Task Slots(CommandEventArgs e)
         {
-            string user = General.FetchUserName(e);
+            string user = Utils.FetchUserName(e);
             await e.Channel.SendMessage(string.Format("*{0}* tries their luck at the slot machine...", user));
 
             try
@@ -81,23 +81,23 @@ namespace SmellyDiscordBot
         {
             try
             {
-                if (General.ReturnInputParameterStringArray(e).Length >= 2)
+                if (Utils.ReturnInputParameterStringArray(e).Length >= 2)
                 {
                     throw new UnusedParametersException("Too many parameters were given.");
                 }
-                var input = General.ReturnInputParameterStringArray(e)[0];
+                var input = Utils.ReturnInputParameterStringArray(e)[0];
                 var minimum = Convert.ToInt32(input.Substring(0, input.IndexOf("-")));
                 var maximum = Convert.ToInt32(input.Remove(0, minimum.ToString().Length + 1));
 
                 Random rand = new Random();
 
                 var outcome = rand.Next(minimum, maximum);
-                await e.Channel.SendMessage(string.Format("*{0}* rolled a **{1}**.", General.FetchUserName(e), outcome));
+                await e.Channel.SendMessage(string.Format("*{0}* rolled a **{1}**.", Utils.FetchUserName(e), outcome));
             }
             catch (Exception ex) when (ex is UnusedParametersException || ex is ArgumentException || ex is FormatException)
             {
                 Console.WriteLine(ex.Message);
-                await General.InproperCommandUsageMessage(e, "roll", "!roll <MINVALUE>-<MAXVALUE>");
+                await Utils.InproperCommandUsageMessage(e, "roll", "!roll <MINVALUE>-<MAXVALUE>");
             }
             catch (Exception ex)
             {

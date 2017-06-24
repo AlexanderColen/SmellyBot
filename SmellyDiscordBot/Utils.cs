@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace SmellyDiscordBot
 {
-    public static class General
+    public static class Utils
     {
         /// <summary>
         /// Fetch the user from the command event.
@@ -40,9 +40,9 @@ namespace SmellyDiscordBot
         /// <param name="commandname">The name of the command.</param>
         /// <param name="usage">The correct usage of the command.</param>
         /// <returns></returns>
-        public static async Task InproperCommandUsageMessage(CommandEventArgs e, string commandname, string usage)
+        public static async Task InproperCommandUsageMessage(CommandEventArgs e, string commandName, string usageExample)
         {
-            await e.Channel.SendMessage(string.Format("Inproper use of the command *!{0}*. It should look like this: *{1}*.", commandname, usage));
+            await e.Channel.SendMessage(string.Format("Inproper use of the command *!{0}*. It should look like this: *{1}*.", commandName, usageExample));
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace SmellyDiscordBot
         /// <returns>Gives the user the requested role.</returns>
         public static async Task AssignRole(CommandEventArgs e)
         {
-            string[] input = General.ReturnInputParameterStringArray(e);
+            string[] input = Utils.ReturnInputParameterStringArray(e);
             for (int i = 0; i < input.Length; i++)
             {
                 foreach (Role r in e.Server.FindRoles(input[i]))
@@ -62,7 +62,7 @@ namespace SmellyDiscordBot
                 }
             }
 
-            await e.Channel.SendMessage(string.Format("The role(s) have been assigned, *{0}*.", General.FetchUserName(e)));
+            await e.Channel.SendMessage(string.Format("The role(s) have been assigned, *{0}*.", Utils.FetchUserName(e)));
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace SmellyDiscordBot
         /// <returns>Removes the role from the user.</returns>
         public static async Task RemoveRole(CommandEventArgs e)
         {
-            string[] input = General.ReturnInputParameterStringArray(e);
+            string[] input = Utils.ReturnInputParameterStringArray(e);
 
             for (int i = 0; i < input.Length; i++)
             {
@@ -83,7 +83,7 @@ namespace SmellyDiscordBot
                 }
             }
 
-            await e.Channel.SendMessage(string.Format("The role(s) have been removed, *{0}*.", General.FetchUserName(e)));
+            await e.Channel.SendMessage(string.Format("The role(s) have been removed, *{0}*.", Utils.FetchUserName(e)));
         }
     }
 }
