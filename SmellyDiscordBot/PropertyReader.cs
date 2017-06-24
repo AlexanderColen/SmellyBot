@@ -12,7 +12,6 @@ namespace SmellyDiscordBot
         private string eventsChannel = "events";
         private string welcomeChannel = "welcome";
         #endregion
-
         #region Properties
         /// <summary>
         /// Getter for prefix.
