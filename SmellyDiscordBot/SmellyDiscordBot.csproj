@@ -77,6 +77,7 @@
   <ItemGroup>
     <Compile Include="Exceptions\UnknownEventException.cs" />
     <Compile Include="Exceptions\DuplicateCommandException.cs" />
+    <Compile Include="PropertyReader.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
