@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace SmellyDiscordBot {
+namespace SmellyDiscordBot.SmellyBot {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
