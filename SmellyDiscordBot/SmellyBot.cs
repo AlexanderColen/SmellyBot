@@ -11,9 +11,7 @@ namespace SmellyDiscordBot
         #region Fields
         private DiscordClient client;
         private CommandService commands;
-        private PropertyReader pr;
         #endregion
-
         private enum eventType
         {
             user,
@@ -32,12 +30,10 @@ namespace SmellyDiscordBot
                 input.LogLevel = LogSeverity.Info;
                 input.LogHandler = Log;
             });
-
-            pr = new PropertyReader("BotProperties.prop");
-
+            
             client.UsingCommands(input =>
             {
-                input.PrefixChar = pr.GetPrefix();
+                input.PrefixChar = Properties.Default.prefix;
                 input.AllowMentionPrefix = true;
             });
 
@@ -81,20 +77,20 @@ namespace SmellyDiscordBot
                 if (e.Command.Text.Contains("user"))
                 {
                     eventtype = eventType.user;
-                    pr.SetUserEvents(!pr.GetUserEvents());
+                    Properties.Default.userEvents = !Properties.Default.userEvents;
                 }
                 else if (e.Command.Text.Contains("channel"))
                 {
                     eventtype = eventType.channel;
-                    pr.SetChannelEvents(!pr.GetChannelEvents());
+                    Properties.Default.channelEvents = !Properties.Default.channelEvents;
                 }
                 else if (e.Command.Text.Contains("role"))
                 {
                     eventtype = eventType.role;
-                    pr.SetRoleEvents(!pr.GetRoleEvents());
+                    Properties.Default.roleEvents = !Properties.Default.roleEvents;
                 }
-                pr.SetWelcomeChannel(firstParameter);
-                pr.SetEventsChannel(secondParameter);
+                Properties.Default.eventsChannel = firstParameter;
+                Properties.Default.welcomeChannel = secondParameter;
 
                 if (eventtype != eventType.none)
                     await e.Channel.SendMessage(ToggleEvents(eventtype));
@@ -138,7 +134,7 @@ namespace SmellyDiscordBot
             try
             {
                 AddCommand(command, response);
-                await e.Channel.SendMessage(string.Format("Succesfully added the *{0}{1}* command!", pr.GetPrefix(), command));
+                await e.Channel.SendMessage(string.Format("Succesfully added the *{0}{1}* command!", Properties.Default.prefix, command));
             }
             catch (DuplicateCommandException dce)
             {
@@ -210,26 +206,26 @@ namespace SmellyDiscordBot
             #region Toggle Events
             commands.CreateCommand("toggleall").Do(async (e) =>
             {
-                pr.SetUserEvents(!pr.GetUserEvents());
-                pr.SetChannelEvents(!pr.GetChannelEvents());
-                pr.SetRoleEvents(!pr.GetRoleEvents());
+                Properties.Default.userEvents = !Properties.Default.userEvents;
+                Properties.Default.channelEvents = !Properties.Default.channelEvents;
+                Properties.Default.roleEvents = !Properties.Default.roleEvents;
                 await e.Channel.SendMessage(ToggleEvents(eventType.user));
                 await e.Channel.SendMessage(ToggleEvents(eventType.channel));
                 await e.Channel.SendMessage(ToggleEvents(eventType.role));
             });
             commands.CreateCommand("toggleuser").Do(async (e) =>
             {
-                pr.SetUserEvents(!pr.GetUserEvents());
+                Properties.Default.userEvents = !Properties.Default.userEvents;
                 await e.Channel.SendMessage(ToggleEvents(eventType.user));
             });
             commands.CreateCommand("togglechannel").Do(async (e) =>
             {
-                pr.SetChannelEvents(!pr.GetChannelEvents());
+                Properties.Default.channelEvents = !Properties.Default.channelEvents;
                 await e.Channel.SendMessage(ToggleEvents(eventType.channel));
             });
             commands.CreateCommand("togglerole").Do(async (e) =>
             {
-                pr.SetRoleEvents(!pr.GetRoleEvents());
+                Properties.Default.roleEvents = !Properties.Default.roleEvents;
                 await e.Channel.SendMessage(ToggleEvents(eventType.role));
             });
             commands.CreateCommand("toggleuser").Parameter("message", ParameterType.Multiple).Do(async (e) =>
@@ -275,7 +271,7 @@ namespace SmellyDiscordBot
             {
                 case eventType.user:
                     #region Messages when user joins, gets banned/unbanned or leaves.
-                    if (pr.GetUserEvents())
+                    if (Properties.Default.userEvents)
                     {
                         client.UserJoined += OnUserJoined;
                         client.UserBanned += OnUserBanned;
@@ -290,10 +286,10 @@ namespace SmellyDiscordBot
                         client.UserLeft -= OnUserLeft;
                     }
                     #endregion
-                    return pr.GetUserEvents() ? "User events have now been turned on." : "User events have now been turned off.";
+                    return Properties.Default.userEvents ? "User events have now been turned on." : "User events have now been turned off.";
                 case eventType.channel:
                     #region Channel creation/destruction
-                    if (pr.GetChannelEvents())
+                    if (Properties.Default.channelEvents)
                     {
                         client.ChannelCreated += OnChannelCreated;
                         client.ChannelDestroyed += OnChannelCreated;
@@ -304,10 +300,10 @@ namespace SmellyDiscordBot
                         client.ChannelDestroyed -= OnChannelCreated;
                     }
                     #endregion
-                    return pr.GetChannelEvents() ? "Channel events have now been turned on." : "Channel events have now been turned off.";
+                    return Properties.Default.channelEvents ? "Channel events have now been turned on." : "Channel events have now been turned off.";
                 case eventType.role:
                     #region Role creation/destruction
-                    if (pr.GetRoleEvents())
+                    if (Properties.Default.roleEvents)
                     {
                         client.RoleCreated += OnRoleCreated;
                         client.RoleDeleted += OnRoleDeleted;
@@ -318,7 +314,7 @@ namespace SmellyDiscordBot
                         client.RoleDeleted -= OnRoleDeleted;
                     }
                     #endregion
-                    return pr.GetRoleEvents() ? "Role events have now been turned on." : "Role events have now been turned off.";
+                    return Properties.Default.roleEvents ? "Role events have now been turned on." : "Role events have now been turned off.";
             }
             return "Something went wrong that shouldn't have went wrong...";
         }
@@ -331,7 +327,7 @@ namespace SmellyDiscordBot
         /// <param name="e">The event arguments for this user.</param>
         public async void OnUserJoined(object sender, UserEventArgs e)
         {
-            var channel = e.Server.FindChannels(pr.GetWelcomeChannel(), ChannelType.Text).FirstOrDefault();
+            var channel = e.Server.FindChannels(Properties.Default.welcomeChannel, ChannelType.Text).FirstOrDefault();
 
             await channel.SendMessage(string.Format("{0} has joined a channel!", e.User.Name));
         }
@@ -343,7 +339,7 @@ namespace SmellyDiscordBot
         /// <param name="e">The event arguments for this user.</param>
         public async void OnUserBanned(object sender, UserEventArgs e)
         {
-            var channel = e.Server.FindChannels(pr.GetEventsChannel(), ChannelType.Text).FirstOrDefault();
+            var channel = e.Server.FindChannels(Properties.Default.eventsChannel, ChannelType.Text).FirstOrDefault();
 
             await channel.SendMessage(string.Format("{0} has been banned from the server!", e.User.Name));
         }
@@ -355,7 +351,7 @@ namespace SmellyDiscordBot
         /// <param name="e">The event arguments for this user.</param>
         public async void OnUserUnbanned(object sender, UserEventArgs e)
         {
-            var channel = e.Server.FindChannels(pr.GetEventsChannel(), ChannelType.Text).FirstOrDefault();
+            var channel = e.Server.FindChannels(Properties.Default.eventsChannel, ChannelType.Text).FirstOrDefault();
 
             await channel.SendMessage(string.Format("{0} has been unbanned from the server!", e.User.Name));
         }
@@ -367,7 +363,7 @@ namespace SmellyDiscordBot
         /// <param name="e">The event arguments for this user.</param>
         public async void OnUserLeft(object sender, UserEventArgs e)
         {
-            var channel = e.Server.FindChannels(pr.GetEventsChannel(), ChannelType.Text).FirstOrDefault();
+            var channel = e.Server.FindChannels(Properties.Default.eventsChannel, ChannelType.Text).FirstOrDefault();
 
             await channel.SendMessage(string.Format("{0} has left a channel!", e.User.Name));
         }
@@ -379,7 +375,7 @@ namespace SmellyDiscordBot
         /// <param name="e">The event arguments for this channel.</param>
         public async void OnChannelCreated(object sender, ChannelEventArgs e)
         {
-            var channel = e.Server.FindChannels(pr.GetEventsChannel(), ChannelType.Text).FirstOrDefault();
+            var channel = e.Server.FindChannels(Properties.Default.eventsChannel, ChannelType.Text).FirstOrDefault();
 
             await channel.SendMessage(string.Format("A new channel named '{0}' has been created!", e.Channel.Name));
         }
@@ -391,7 +387,7 @@ namespace SmellyDiscordBot
         /// <param name="e">The event arguments for this channel.</param>
         public async void OnChannelDestroyed(object sender, ChannelEventArgs e)
         {
-            var channel = e.Server.FindChannels(pr.GetEventsChannel(), ChannelType.Text).FirstOrDefault();
+            var channel = e.Server.FindChannels(Properties.Default.eventsChannel, ChannelType.Text).FirstOrDefault();
 
             await channel.SendMessage(string.Format("The channel named '{0}' has been deleted!", e.Channel.Name));
         }
@@ -403,7 +399,7 @@ namespace SmellyDiscordBot
         /// <param name="e">The event arguments for this role.</param>
         public async void OnRoleCreated(object sender, RoleEventArgs e)
         {
-            var channel = e.Server.FindChannels(pr.GetEventsChannel(), ChannelType.Text).FirstOrDefault();
+            var channel = e.Server.FindChannels(Properties.Default.eventsChannel, ChannelType.Text).FirstOrDefault();
 
             await channel.SendMessage(string.Format("A new role named '{0}' has been created!", e.Role.Name));
         }
@@ -415,7 +411,7 @@ namespace SmellyDiscordBot
         /// <param name="e">The event arguments for this role.</param>
         public async void OnRoleDeleted(object sender, RoleEventArgs e)
         {
-            var channel = e.Server.FindChannels(pr.GetEventsChannel(), ChannelType.Text).FirstOrDefault();
+            var channel = e.Server.FindChannels(Properties.Default.eventsChannel, ChannelType.Text).FirstOrDefault();
 
             await channel.SendMessage(string.Format("A role named '{0}' has been deleted!", e.Role.Name));
         }

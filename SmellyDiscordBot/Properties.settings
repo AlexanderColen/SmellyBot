@@ -1,0 +1,24 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="SmellyDiscordBot" GeneratedClassName="Properties">
+  <Profiles />
+  <Settings>
+    <Setting Name="prefix" Type="System.Char" Scope="User">
+      <Value Profile="(Default)">!</Value>
+    </Setting>
+    <Setting Name="welcomeChannel" Type="System.String" Scope="User">
+      <Value Profile="(Default)">welcome</Value>
+    </Setting>
+    <Setting Name="eventsChannel" Type="System.String" Scope="User">
+      <Value Profile="(Default)">server-updates</Value>
+    </Setting>
+    <Setting Name="userEvents" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="channelEvents" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="roleEvents" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
