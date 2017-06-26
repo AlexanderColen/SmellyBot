@@ -118,20 +118,14 @@ namespace SmellyDiscordBot
                     if (line.Contains("Prefix="))
                         this.prefix = line.Substring(7).ToCharArray()[0];
                     else if (line.Contains("User Events Toggle="))
-                    {
                         if ("true".Equals(line.Substring(18)))
                             this.userEventsOn = true;
-                    }
                     else if (line.Contains("Channel Events Toggle="))
-                    {
                         if ("true".Equals(line.Substring(22)))
                             this.channelEventsOn = true;
-                    }
                     else if (line.Contains("Role Events Toggle="))
-                    {
                         if ("true".Equals(line.Substring(19)))
                             this.roleEventsOn = true;
-                    }
                     else if (line.Contains("Welcome Channel="))
                         this.welcomeChannel = line.Substring(16);
                     else if (line.Contains("Events Channel="))

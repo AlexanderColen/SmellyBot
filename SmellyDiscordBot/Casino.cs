@@ -52,17 +52,11 @@ namespace SmellyDiscordBot
 
                 //TODO Do something with the outcome. (Possibly when betting is added?)
                 if (enum1.Equals(enum2) && enum2.Equals(enum3))
-                {
                     await e.Channel.SendMessage(string.Format("*{0}* has hit the jackpot!", user));
-                }
                 else if (enum1.Equals(enum2) || enum2.Equals(enum3) || enum1.Equals(enum3))
-                {
                     await e.Channel.SendMessage("So close, yet so far.");
-                }
                 else
-                {
                     await e.Channel.SendMessage(string.Format("Better luck next time, *{0}*...", user));
-                }
             }
             catch (Exception ex)
             {
@@ -82,9 +76,8 @@ namespace SmellyDiscordBot
             try
             {
                 if (Utils.ReturnInputParameterStringArray(e).Length >= 2)
-                {
                     throw new UnusedParametersException("Too many parameters were given.");
-                }
+
                 var input = Utils.ReturnInputParameterStringArray(e)[0];
                 var minimum = Convert.ToInt32(input.Substring(0, input.IndexOf("-")));
                 var maximum = Convert.ToInt32(input.Remove(0, minimum.ToString().Length + 1));

@@ -72,13 +72,9 @@ namespace SmellyDiscordBot
 
                 //Meaning that there are more given parameters than necessary.
                 if (input.Length >= 3)
-                {
                     throw new UnusedParametersException("Too many parameters were given.");
-                }
                 else if (input.Length <= 1)
-                {
                     throw new UnusedParametersException("Too few parameters were given.");
-                }
 
                 eventType eventtype = eventType.none;
 
@@ -101,13 +97,9 @@ namespace SmellyDiscordBot
                 pr.SetEventsChannel(secondParameter);
 
                 if (eventtype != eventType.none)
-                {
                     await e.Channel.SendMessage(ToggleEvents(eventtype));
-                }
                 else
-                {
                     throw new UnknownEventException("Event not found.");
-                }
             }
             catch (Exception ex) when (ex is UnusedParametersException || ex is IndexOutOfRangeException)
             {
@@ -134,22 +126,14 @@ namespace SmellyDiscordBot
             string response = "";
             
             for (int i = 1; i<input.Length; i++)
-            {
                 response += input[i] + " ";
-            }
 
             if (input.Length <= 1)
-            {
                 throw new UnusedParametersException("Too few parameters were given.");
-            }
 
             foreach (Command c in commands.AllCommands)
-            {
                 if (c.Text.Contains(command))
-                {
                     throw new DuplicateCommandException("Duplicate command attempted to be added.");
-                }
-            }
 
             try
             {
