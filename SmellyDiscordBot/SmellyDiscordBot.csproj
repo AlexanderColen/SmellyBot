@@ -92,22 +92,22 @@
   <ItemGroup>
     <Compile Include="Exceptions\UnknownEventException.cs" />
     <Compile Include="Exceptions\DuplicateCommandException.cs" />
-    <Compile Include="SmellyBot\Properties.Designer.cs">
+    <Compile Include="Bot\Properties.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Properties.settings</DependentUpon>
     </Compile>
-    <Compile Include="SmellyBot\Utils.cs" />
-    <Compile Include="SmellyBot\Program.cs" />
+    <Compile Include="General\Utils.cs" />
+    <Compile Include="Bot\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SmellyBot\Casino.cs" />
-    <Compile Include="SmellyBot\SmellyBot.cs" />
+    <Compile Include="General\Casino.cs" />
+    <Compile Include="Bot\SmellyBot.cs" />
     <Compile Include="Exceptions\UnusedParametersException.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="SmellyBot\App.config" />
-    <None Include="SmellyBot\packages.config" />
-    <None Include="SmellyBot\Properties.settings">
+    <None Include="Bot\App.config" />
+    <None Include="Bot\packages.config" />
+    <None Include="Bot\Properties.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Properties.Designer.cs</LastGenOutput>
     </None>
