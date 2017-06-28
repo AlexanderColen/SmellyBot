@@ -48,7 +48,7 @@ namespace SmellyDiscordBot
 
             client.ExecuteAndWait(async () =>
             {
-                await client.Connect("MzE0ODIwMjU5NDE4OTk2NzM2.DAYcvg.vDWGavl5N7hr7WRnvgGa14J6d3s", TokenType.Bot);
+                await client.Connect("MzE0ODIwMjU5NDE4OTk2NzM2.DDW2Ew.u_uJQvSxXF-ki1QWe5O_YShMyEM", TokenType.Bot);
             });
         }
 
