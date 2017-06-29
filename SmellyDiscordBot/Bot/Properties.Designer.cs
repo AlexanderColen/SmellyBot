@@ -94,5 +94,17 @@ namespace SmellyDiscordBot.Bot {
                 this["roleEvents"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("MzE0ODIwMjU5NDE4OTk2NzM2.DDW2Ew.u_uJQvSxXF-ki1QWe5O_YShMyEM")]
+        public string botToken {
+            get {
+                return ((string)(this["botToken"]));
+            }
+            set {
+                this["botToken"] = value;
+            }
+        }
     }
 }
