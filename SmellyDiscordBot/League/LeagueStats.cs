@@ -2,6 +2,7 @@
 using RiotSharp;
 using SmellyDiscordBot.Exceptions;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SmellyDiscordBot.League
@@ -30,18 +31,16 @@ namespace SmellyDiscordBot.League
             var input = Utils.ReturnInputParameterStringArray(e);
             string regionString = input[0];
             string summonerName = "";
+
             if (input.Length == 2)
-            {
                 summonerName = input[1];
-            }
             else
             {
                 summonerName = input[1];
                 for (int i = 2; i < input.Length; i++)
-                {
                     summonerName = String.Format("{0} {1}", summonerName, input[i]);
-                }
             }
+
             try
             {
                 var summoner = GetSummoner(regionString, summonerName);
@@ -50,6 +49,10 @@ namespace SmellyDiscordBot.League
             catch (Exception ex) when (ex is RiotSharpException || ex is IndexOutOfRangeException)
             {
                 await Utils.InproperCommandUsageMessage(e, "level", "level <REGION> <SUMMONERNAME>");
+            }
+            catch (Exception ex) when (ex is SummonerNotFoundException || ex is RegionNotFoundException)
+            {
+                await e.Channel.SendMessage(ex.Message);
             }
         }
 
@@ -63,36 +66,102 @@ namespace SmellyDiscordBot.League
             var input = Utils.ReturnInputParameterStringArray(e);
             string regionString = input[0];
             string summonerName = "";
+
             if (input.Length == 2)
-            {
                 summonerName = input[1];
-            }
             else
             {
                 summonerName = input[1];
                 for (int i = 2; i < input.Length; i++)
-                {
                     summonerName = String.Format("{0} {1}", summonerName, input[i]);
-                }
             }
+
             RiotSharp.SummonerEndpoint.Summoner summoner = null;
+
             try
             {
                 summoner = GetSummoner(regionString, summonerName);
+
+                string output = String.Format("Ranked statistics for *{0}*: \n ```", summoner.Name);
+
                 foreach (RiotSharp.LeagueEndpoint.League league in summoner.GetLeagues())
-                {
-                    await e.Channel.SendMessage(string.Format("*{0}* is in **{1}** for {2}.", summoner.Name, league.Tier, league.Queue));
-                }
+                    output += string.Format("\n {0} - {1} - {2}", 
+                                                league.Tier.ToString().PadRight(10), 
+                                                league.Name.ToString().PadRight(25), 
+                                                league.Queue);
+                output += "```";
+
+                await e.Channel.SendMessage(output);
             }
             catch (IndexOutOfRangeException)
             {
-                await Utils.InproperCommandUsageMessage(e, "rank", "level <REGION> <SUMMONERNAME>");
+                await Utils.InproperCommandUsageMessage(e, "rank", "rank <REGION> <SUMMONERNAME>");
             }
             catch (RiotSharpException)
             {
                 await e.Channel.SendMessage(String.Format("*{0}* is **Unranked**.", summoner.Name));
             }
-            catch (SummonerNotFoundException ex)
+            catch (Exception ex) when (ex is SummonerNotFoundException || ex is RegionNotFoundException)
+            {
+                await e.Channel.SendMessage(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Fetches the given Summoner's current game from the RiotAPI for the given region.
+        /// </summary>
+        /// <param name="e">The command event which was executed.</param>
+        /// <returns>A message in the channel with information about the current game of the Summoner in the region.</returns>
+        public async Task GetCurrentGameStats(CommandEventArgs e)
+        {
+            var input = Utils.ReturnInputParameterStringArray(e);
+            string regionString = input[0];
+            string summonerName = input[1];
+
+            try
+            {
+                var summoner = GetSummoner(regionString, summonerName);
+                var currentGame = api.GetCurrentGame(GetPlatform(regionString), summoner.Id);
+
+                List<RiotSharp.CurrentGameEndpoint.Participant> blueTeam = new List<RiotSharp.CurrentGameEndpoint.Participant>();
+                List<RiotSharp.CurrentGameEndpoint.Participant> redTeam = new List<RiotSharp.CurrentGameEndpoint.Participant>();
+                foreach (RiotSharp.CurrentGameEndpoint.Participant player in currentGame.Participants)
+                {
+                    if (player.TeamId == 100)
+                        blueTeam.Add(player);
+                    else
+                        redTeam.Add(player);
+                }
+
+                int minutes = (Int32) currentGame.GameLength / 60;
+                int seconds = (Int32) currentGame.GameLength % 60;
+
+                string output = String.Format("*{0}* is currently in a game of **{1}**.", summoner.Name, currentGame.GameMode) + "\n"
+                                               + String.Format("This match started at *{0}* and has been going on for **{1}:{2}** (+ ~ 5 minutes).", 
+                                                    currentGame.GameStartTime.ToShortTimeString(), 
+                                                    minutes.ToString().PadLeft(2, '0'), 
+                                                    seconds.ToString().PadLeft(2, '0'), 
+                                                    currentGame.GameLength) + "\n"
+                                               + "```"
+                                               + "Blue Team".PadRight(20) + " - " + "Red Team".PadLeft(20) + "\n"
+                                               + "".PadRight(43, '~') + "\n"
+                                               + blueTeam[0].SummonerName.ToString().PadRight(20) + " - " + redTeam[0].SummonerName.PadLeft(20) + "\n"
+                                               + blueTeam[1].SummonerName.ToString().PadRight(20) + " - " + redTeam[1].SummonerName.PadLeft(20) + "\n"
+                                               + blueTeam[2].SummonerName.ToString().PadRight(20) + " - " + redTeam[2].SummonerName.PadLeft(20) + "\n"
+                                               + blueTeam[3].SummonerName.ToString().PadRight(20) + " - " + redTeam[3].SummonerName.PadLeft(20) + "\n"
+                                               + blueTeam[4].SummonerName.ToString().PadRight(20) + " - " + redTeam[4].SummonerName.PadLeft(20) + "\n"
+                                               + "```";
+                await e.Channel.SendMessage(output);
+            }
+            catch (RiotSharpException)
+            {
+                await e.Channel.SendMessage("This summoner is currently not in a game.");
+            }
+            catch (IndexOutOfRangeException)
+            {
+                await Utils.InproperCommandUsageMessage(e, "currentgame", "currentgame <REGION> <SUMMONERNAME>");
+            }
+            catch (Exception ex) when (ex is SummonerNotFoundException || ex is RegionNotFoundException)
             {
                 await e.Channel.SendMessage(ex.Message);
             }
@@ -142,11 +211,59 @@ namespace SmellyDiscordBot.League
                     region = Region.tr;
                     break;
                 default:
-                    region = Region.global;
-                    break;
+                    throw new RegionNotFoundException("This region does not exist (yet).");
             }
             #endregion
             return region;
+        }
+
+        /// <summary>
+        /// Converts the string input to a RiotSharp.Platform.
+        /// </summary>
+        private Platform GetPlatform(string input)
+        {
+            input = input.ToLower();
+            Platform platform;
+            #region Platform Switch
+            switch (input)
+            {
+                case "br":
+                    platform = Platform.BR1;
+                    break;
+                case "eune":
+                    platform = Platform.EUN1;
+                    break;
+                case "euw":
+                    platform = Platform.EUW1;
+                    break;
+                case "jp":
+                    throw new RegionNotFoundException("This region does not exist in the API (yet).");
+                case "kr":
+                    platform = Platform.KR;
+                    break;
+                case "lan":
+                    platform = Platform.LA1;
+                    break;
+                case "las":
+                    platform = Platform.LA2;
+                    break;
+                case "na":
+                    platform = Platform.NA1;
+                    break;
+                case "oce":
+                    platform = Platform.OC1;
+                    break;
+                case "ru":
+                    platform = Platform.RU;
+                    break;
+                case "tr":
+                    platform = Platform.TR1;
+                    break;
+                default:
+                    throw new RegionNotFoundException("This region does not exist (yet).");
+            }
+            #endregion
+            return platform;
         }
 
         /// <summary>
