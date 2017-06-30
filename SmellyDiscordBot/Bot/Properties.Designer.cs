@@ -25,18 +25,6 @@ namespace SmellyDiscordBot.Bot {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("!")]
-        public char prefix {
-            get {
-                return ((char)(this["prefix"]));
-            }
-            set {
-                this["prefix"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("welcome")]
         public string welcomeChannel {
             get {
@@ -44,6 +32,30 @@ namespace SmellyDiscordBot.Bot {
             }
             set {
                 this["welcomeChannel"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("MzE0ODIwMjU5NDE4OTk2NzM2.DDW2Ew.u_uJQvSxXF-ki1QWe5O_YShMyEM")]
+        public string botToken {
+            get {
+                return ((string)(this["botToken"]));
+            }
+            set {
+                this["botToken"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("!")]
+        public char prefix {
+            get {
+                return ((char)(this["prefix"]));
+            }
+            set {
+                this["prefix"] = value;
             }
         }
         
@@ -97,13 +109,13 @@ namespace SmellyDiscordBot.Bot {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("MzE0ODIwMjU5NDE4OTk2NzM2.DDW2Ew.u_uJQvSxXF-ki1QWe5O_YShMyEM")]
-        public string botToken {
+        [global::System.Configuration.DefaultSettingValueAttribute("unknown")]
+        public string riotAPIkey {
             get {
-                return ((string)(this["botToken"]));
+                return ((string)(this["riotAPIkey"]));
             }
             set {
-                this["botToken"] = value;
+                this["riotAPIkey"] = value;
             }
         }
     }

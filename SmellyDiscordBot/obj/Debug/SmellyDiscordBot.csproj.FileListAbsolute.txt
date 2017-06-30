@@ -36,3 +36,16 @@ D:\DiscordBot\SmellyDiscordBot\bin\Debug\Nito.AsyncEx.Concurrent.xml
 D:\DiscordBot\SmellyDiscordBot\bin\Debug\Nito.AsyncEx.Enlightenment.xml
 D:\DiscordBot\SmellyDiscordBot\bin\Debug\RestSharp.xml
 D:\DiscordBot\SmellyDiscordBot\obj\Debug\SmellyDiscordBot.csprojResolveAssemblyReference.cache
+D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\bin\Debug\RiotSharp.dll
+D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\bin\Debug\System.Net.Http.Extensions.dll
+D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\bin\Debug\System.Net.Http.Primitives.dll
+D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\bin\Debug\System.Reactive.Core.dll
+D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\bin\Debug\System.Reactive.Interfaces.dll
+D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\bin\Debug\System.Reactive.Linq.dll
+D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\bin\Debug\RiotSharp.xml
+D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\bin\Debug\System.Net.Http.Extensions.xml
+D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\bin\Debug\System.Net.Http.Primitives.xml
+D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\bin\Debug\System.Reactive.Core.xml
+D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\bin\Debug\System.Reactive.Interfaces.xml
+D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\bin\Debug\System.Reactive.Linq.xml
+D:\DiscordBot\SmellyDiscordBot\SmellyDiscordBot\obj\Debug\SmellyDiscordBot.csproj.App.config

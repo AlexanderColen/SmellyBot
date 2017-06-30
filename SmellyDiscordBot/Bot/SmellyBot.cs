@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using SmellyDiscordBot.Bot;
+using SmellyDiscordBot.League;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ namespace SmellyDiscordBot
         #region Fields
         private DiscordClient client;
         private CommandService commands;
+        private LeagueStats stats = null;
         #endregion
         private enum eventType
         {
@@ -262,6 +264,20 @@ namespace SmellyDiscordBot
             commands.CreateCommand("save").Do(async (e) => {
                 Properties.Default.Save();
                 await e.Channel.SendMessage("The changes to the settings file were saved!");
+            });
+            #endregion
+            #region League
+            commands.CreateCommand("level").Parameter("message", ParameterType.Multiple).Do(async(e) => 
+            {
+                if (stats == null)
+                    stats = new LeagueStats(Properties.Default.riotAPIkey);
+                await stats.GetSummonerLevel(e);
+            });
+            commands.CreateCommand("rank").Parameter("message", ParameterType.Multiple).Do(async (e) =>
+            {
+                if (stats == null)
+                    stats = new LeagueStats(Properties.Default.riotAPIkey);
+                await stats.GetSummonerRank(e);
             });
             #endregion
         }

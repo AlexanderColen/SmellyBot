@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
+using SmellyDiscordBot.Bot;
 using System.Threading.Tasks;
 
 namespace SmellyDiscordBot
@@ -40,7 +41,7 @@ namespace SmellyDiscordBot
         /// <returns></returns>
         public static async Task InproperCommandUsageMessage(CommandEventArgs e, string commandName, string usageExample)
         {
-            await e.Channel.SendMessage(string.Format("Inproper use of the command *!{0}*. It should look like this: *{1}*.", commandName, usageExample));
+            await e.Channel.SendMessage(string.Format("Inproper use of the command *{0}{1}*. It should look like this: *{2}*.", Properties.Default.prefix, commandName, usageExample));
         }
 
         /// <summary>

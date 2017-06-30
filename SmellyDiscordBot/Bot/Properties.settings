@@ -2,11 +2,14 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="SmellyDiscordBot.Bot" GeneratedClassName="Properties">
   <Profiles />
   <Settings>
-    <Setting Name="prefix" Type="System.Char" Scope="User">
-      <Value Profile="(Default)">!</Value>
-    </Setting>
     <Setting Name="welcomeChannel" Type="System.String" Scope="User">
       <Value Profile="(Default)">welcome</Value>
+    </Setting>
+    <Setting Name="botToken" Type="System.String" Scope="User">
+      <Value Profile="(Default)">MzE0ODIwMjU5NDE4OTk2NzM2.DDW2Ew.u_uJQvSxXF-ki1QWe5O_YShMyEM</Value>
+    </Setting>
+    <Setting Name="prefix" Type="System.Char" Scope="User">
+      <Value Profile="(Default)">!</Value>
     </Setting>
     <Setting Name="eventsChannel" Type="System.String" Scope="User">
       <Value Profile="(Default)">server-updates</Value>
@@ -20,8 +23,8 @@
     <Setting Name="roleEvents" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="botToken" Type="System.String" Scope="User">
-      <Value Profile="(Default)">MzE0ODIwMjU5NDE4OTk2NzM2.DDW2Ew.u_uJQvSxXF-ki1QWe5O_YShMyEM</Value>
+    <Setting Name="riotAPIkey" Type="System.String" Scope="User">
+      <Value Profile="(Default)">unknown</Value>
     </Setting>
   </Settings>
 </SettingsFile>
