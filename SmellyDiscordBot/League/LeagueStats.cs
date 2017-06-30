@@ -79,7 +79,10 @@ namespace SmellyDiscordBot.League
             try
             {
                 summoner = GetSummoner(regionString, summonerName);
-                await e.Channel.SendMessage(string.Format("*{0}* is in **{1}**.", summoner.Name, summoner.GetLeagues()[0].Tier));
+                foreach (RiotSharp.LeagueEndpoint.League league in summoner.GetLeagues())
+                {
+                    await e.Channel.SendMessage(string.Format("*{0}* is in **{1}** for {2}.", summoner.Name, league.Tier, league.Queue));
+                }
             }
             catch (IndexOutOfRangeException)
             {
@@ -87,7 +90,7 @@ namespace SmellyDiscordBot.League
             }
             catch (RiotSharpException)
             {
-                await e.Channel.SendMessage(String.Format("{0} is unranked.", summoner.Name));
+                await e.Channel.SendMessage(String.Format("*{0}* is **Unranked**.", summoner.Name));
             }
             catch (SummonerNotFoundException ex)
             {
