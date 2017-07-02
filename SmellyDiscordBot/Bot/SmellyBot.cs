@@ -285,6 +285,13 @@ namespace SmellyDiscordBot
                     stats = new LeagueStats(Properties.Default.riotAPIkey);
                 await stats.GetCurrentGameStats(e);
             });
+            commands.CreateCommand("status").Parameter("message", ParameterType.Required).Do(async (e) =>
+            {
+                if (stats == null)
+                    stats = new LeagueStats(Properties.Default.riotAPIkey);
+                await stats.GetLeagueStatus(e);
+            });
+            AddCommand("status", String.Format("Inproper use of the command *{0}status*. It should look like this: *{0}status <REGION>*.", Properties.Default.prefix));
             #endregion
         }
 

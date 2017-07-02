@@ -10,6 +10,8 @@ namespace SmellyDiscordBot.League
     public class LeagueStats
     {
         RiotApi api;
+        StatusRiotApi statusApi;
+        StaticRiotApi staticApi;
 
         /// <summary>
         /// Constructor for this class which fetches the API instance..
@@ -18,7 +20,11 @@ namespace SmellyDiscordBot.League
         public LeagueStats(string apiKey)
         {
             if (!"unknown".Equals(apiKey))
+            {
                 api = RiotApi.GetInstance(apiKey);
+                staticApi = StaticRiotApi.GetInstance(apiKey);
+            }
+            statusApi = StatusRiotApi.GetInstance();
         }
 
         /// <summary>
@@ -152,10 +158,10 @@ namespace SmellyDiscordBot.League
 
                 //Information to display.
                 string output = String.Format("*{0}* is currently in a game of **{1}** on {2}.", summoner.Name, currentGame.GameMode, currentGame.MapType) + "\n"
-                                               + String.Format("This match started at *{0}* and has been going on for **{1}:{2}** (+ ~ 5 minutes).", 
-                                                    currentGame.GameStartTime.ToShortTimeString(), 
-                                                    minutes.ToString().PadLeft(2, '0'), 
-                                                    seconds.ToString().PadLeft(2, '0'), 
+                                               + String.Format("This match started at *{0}* and has been going on for **{1}:{2}** (+ ~ 5 minutes).",
+                                                    currentGame.GameStartTime.ToShortTimeString(),
+                                                    minutes.ToString().PadLeft(2, '0'),
+                                                    seconds.ToString().PadLeft(2, '0'),
                                                     currentGame.GameLength) + "\n"
                                                + "```"
                                                + "Blue Team".PadRight(20) + " - " + "Red Team".PadLeft(20) + "\n"
@@ -170,7 +176,7 @@ namespace SmellyDiscordBot.League
             }
             catch (RiotSharpException)
             {
-                await e.Channel.SendMessage("This summoner is currently not in a game.");
+                await e.Channel.SendMessage("This Summoner is currently not in a game.");
             }
             catch (IndexOutOfRangeException)
             {
@@ -179,6 +185,33 @@ namespace SmellyDiscordBot.League
             catch (Exception ex) when (ex is SummonerNotFoundException || ex is RegionNotFoundException)
             {
                 await e.Channel.SendMessage(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Checks the server status of the requested region.
+        /// </summary>
+        /// <param name="e">The command event which was executed.</param>
+        /// <returns>A message in the channel with information regarding the server status for the requested region.</returns>
+        public async Task GetLeagueStatus(CommandEventArgs e)
+        {
+            var input = Utils.ReturnInputParameterStringArray(e);
+            string regionString = input[0];
+
+            try
+            {
+                string output = "Checking status of: **" + GetRegion(regionString) + "** server. \n ```";
+                var shardStatuses = statusApi.GetShardStatus(GetRegion(regionString));
+                foreach (var service in shardStatuses.Services)
+                {
+                    output += String.Format("Status of {0}: {1}. ({2} incidents happened)", service.Name, service.Status, service.Incidents.Count) + "\n";
+                }
+                output += "```";
+                await e.Channel.SendMessage(output);
+            }
+            catch (RiotSharpException)
+            {
+                await Utils.InproperCommandUsageMessage(e, "status", "status <REGION>");
             }
         }
 
