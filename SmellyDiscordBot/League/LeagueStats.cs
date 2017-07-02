@@ -54,6 +54,7 @@ namespace SmellyDiscordBot.League
             }
             catch (Exception ex) when (ex is RiotSharpException || ex is IndexOutOfRangeException)
             {
+                Console.WriteLine(ex.Message);
                 await Utils.InproperCommandUsageMessage(e, "level", "level <REGION> <SUMMONERNAME>");
             }
             catch (Exception ex) when (ex is SummonerNotFoundException || ex is RegionNotFoundException)
@@ -103,8 +104,9 @@ namespace SmellyDiscordBot.League
             {
                 await Utils.InproperCommandUsageMessage(e, "rank", "rank <REGION> <SUMMONERNAME>");
             }
-            catch (RiotSharpException)
+            catch (RiotSharpException ex)
             {
+                Console.WriteLine(ex.Message);
                 await e.Channel.SendMessage(String.Format("*{0}* is **Unranked**.", summoner.Name));
             }
             catch (Exception ex) when (ex is SummonerNotFoundException || ex is RegionNotFoundException)
@@ -128,15 +130,24 @@ namespace SmellyDiscordBot.League
             {
                 var summoner = GetSummoner(regionString, summonerName);
                 var currentGame = api.GetCurrentGame(GetPlatform(regionString), summoner.Id);
+                string[] summoners = new string[10];
+                Region region = GetRegion(regionString);
 
                 List<RiotSharp.CurrentGameEndpoint.Participant> blueTeam = new List<RiotSharp.CurrentGameEndpoint.Participant>();
                 List<RiotSharp.CurrentGameEndpoint.Participant> redTeam = new List<RiotSharp.CurrentGameEndpoint.Participant>();
-                foreach (RiotSharp.CurrentGameEndpoint.Participant player in currentGame.Participants)
+                for (int i = 0; i < currentGame.Participants.Count; i++)
                 {
-                    if (player.TeamId == 100)
-                        blueTeam.Add(player);
-                    else
-                        redTeam.Add(player);
+                    if (currentGame.Participants[i].TeamId == 100)
+                        blueTeam.Add(currentGame.Participants[i]);
+                    else if (currentGame.Participants[i].TeamId == 200)
+                        redTeam.Add(currentGame.Participants[i]);
+
+                    string champion = "";
+                    if (currentGame.Participants[i].ChampionId != 0)
+                    {
+                        champion = " (" + staticApi.GetChampion(region, (Int32)currentGame.Participants[i].ChampionId).Name + ")";
+                    }
+                    summoners[i] = currentGame.Participants[i].SummonerName.PadRight(20) + champion;
                 }
 
                 //Fill up empty slots.
@@ -145,11 +156,12 @@ namespace SmellyDiscordBot.League
                     int emptySlots = 10;
                     emptySlots -= redTeam.Count;
                     emptySlots -= blueTeam.Count;
+                    RiotSharp.CurrentGameEndpoint.Participant emptyParticipant = new RiotSharp.CurrentGameEndpoint.Participant();
 
                     for (int i = 0; i < emptySlots / 2; i++)
                     {
-                        redTeam.Add(new RiotSharp.CurrentGameEndpoint.Participant());
-                        blueTeam.Add(new RiotSharp.CurrentGameEndpoint.Participant());
+                        redTeam.Add(emptyParticipant);
+                        blueTeam.Add(emptyParticipant);
                     }
                 }
 
@@ -157,25 +169,30 @@ namespace SmellyDiscordBot.League
                 int seconds = (Int32) currentGame.GameLength % 60;
 
                 //Information to display.
-                string output = String.Format("*{0}* is currently in a game of **{1}** on {2}.", summoner.Name, currentGame.GameMode, currentGame.MapType) + "\n"
+                string output = String.Format("*{0}* is currently in a **{1}** game on {2}. ({3})", summoner.Name, currentGame.GameMode, currentGame.MapType, currentGame.GameQueueType) + "\n"
                                                + String.Format("This match started at *{0}* and has been going on for **{1}:{2}** (+ ~ 5 minutes).",
                                                     currentGame.GameStartTime.ToShortTimeString(),
                                                     minutes.ToString().PadLeft(2, '0'),
                                                     seconds.ToString().PadLeft(2, '0'),
                                                     currentGame.GameLength) + "\n"
                                                + "```"
-                                               + "Blue Team".PadRight(20) + " - " + "Red Team".PadLeft(20) + "\n"
-                                               + "".PadRight(43, '~') + "\n"
-                                               + blueTeam[0].SummonerName.ToString().PadRight(20) + " - " + redTeam[0].SummonerName.PadLeft(20) + "\n"
-                                               + blueTeam[1].SummonerName.ToString().PadRight(20) + " - " + redTeam[1].SummonerName.PadLeft(20) + "\n"
-                                               + blueTeam[2].SummonerName.ToString().PadRight(20) + " - " + redTeam[2].SummonerName.PadLeft(20) + "\n"
-                                               + blueTeam[3].SummonerName.ToString().PadRight(20) + " - " + redTeam[3].SummonerName.PadLeft(20) + "\n"
-                                               + blueTeam[4].SummonerName.ToString().PadRight(20) + " - " + redTeam[4].SummonerName.PadLeft(20) + "\n"
-                                               + "```";
+                                               + "".PadLeft(13) + "Blue Team".PadRight(22) + " - " + "".PadLeft(13) + "Red Team".PadRight(22) + "\n"
+                                               + "".PadRight(75, '~') + "\n";
+                
+                for (int i = 0; i < currentGame.Participants.Count / 2; i++)
+                {
+                    output += summoners[i].PadRight(35);
+                    output += " - ";
+                    output += summoners[i + 5].PadRight(35);
+                    output += " \n";
+                }
+                                                
+                output += "```";
                 await e.Channel.SendMessage(output);
             }
-            catch (RiotSharpException)
+            catch (RiotSharpException ex)
             {
+                Console.WriteLine(ex.Message);
                 await e.Channel.SendMessage("This Summoner is currently not in a game.");
             }
             catch (IndexOutOfRangeException)
@@ -200,9 +217,10 @@ namespace SmellyDiscordBot.League
 
             try
             {
-                string output = "Checking status of: **" + GetRegion(regionString) + "** server. \n ```";
-                var shardStatuses = statusApi.GetShardStatus(GetRegion(regionString));
-                shardStatuses = statusApi.GetShardStatus(Region.global);
+                Region region = GetRegion(regionString);
+                string output = "Checking status of: **" + region + "** server. \n ```";
+                var shardStatuses = statusApi.GetShardStatus(region);
+                shardStatuses = statusApi.GetShardStatus(region);
                 foreach (var service in shardStatuses.Services)
                 {
                     output += String.Format("Status of {0}: {1}. ({2} incidents happened)", service.Name, service.Status, service.Incidents.Count) + "\n";
@@ -210,8 +228,9 @@ namespace SmellyDiscordBot.League
                 output += "```";
                 await e.Channel.SendMessage(output);
             }
-            catch (RiotSharpException)
+            catch (RiotSharpException ex)
             {
+                Console.WriteLine(ex.Message);
                 await e.Channel.SendMessage("Something went wrong that shouldn't have gone wrong...");
             }
             catch (RegionNotFoundException ex)
@@ -219,7 +238,7 @@ namespace SmellyDiscordBot.League
                 await e.Channel.SendMessage(ex.Message);
             }
         }
-
+        
         /// <summary>
         /// Converts the string input to a RiotSharp.Region.
         /// </summary>
