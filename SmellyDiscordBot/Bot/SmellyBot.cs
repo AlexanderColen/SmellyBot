@@ -309,6 +309,12 @@ namespace SmellyDiscordBot
                     stats = new LeagueStats(Properties.Default.riotAPIkey);
                 await stats.GetChampionCounter(e);
             });
+            commands.CreateCommand("howto").Parameter("message", ParameterType.Required).Do(async (e) =>
+            {
+                if (stats == null)
+                    stats = new LeagueStats(Properties.Default.riotAPIkey);
+                await stats.GetChampionTips(e);
+            });
             #endregion
         }
 

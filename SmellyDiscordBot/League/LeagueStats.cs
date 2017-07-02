@@ -243,7 +243,7 @@ namespace SmellyDiscordBot.League
         }
 
         /// <summary>
-        /// Fetches specific champion info from Riot API.
+        /// Fetches a specific champion's info from Riot API.
         /// </summary>
         /// <param name="e">The command event which was executed.</param>
         /// <returns>A message in the channel with information regarding the requested champion.</returns>
@@ -359,6 +359,41 @@ namespace SmellyDiscordBot.League
                 string output = String.Format("Tips for playing against **{0}**:", champ.Name);
                 output += "```" + "\n";
                 foreach (string tip in champ.EnemyTips)
+                {
+                    output += tip + "\n";
+                }
+                output += "```";
+                await e.Channel.SendMessage(output);
+            }
+            catch (RiotSharpException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            catch (IndexOutOfRangeException)
+            {
+                await Utils.InproperCommandUsageMessage(e, "counter", "counter <CHAMPIONNAME>");
+            }
+            catch (NullReferenceException)
+            {
+                await e.Channel.SendMessage("Champion not found.");
+            }
+        }
+
+        /// <summary>
+        /// Fetches tips to play a specific champion from Riot API.
+        /// </summary>
+        /// <param name="e">The command event which was executed.</param>
+        /// <returns>A message in the channel with information regarding the ways to play the champion.</returns>
+        public async Task GetChampionTips(CommandEventArgs e)
+        {
+            var input = Utils.ReturnInputParameterStringArray(e);
+            string championname = input[0].ToLower();
+            try
+            {
+                ChampionStatic champ = GetChampion(Region.na, championname);
+                string output = String.Format("Tips for playing **{0}**:", champ.Name);
+                output += "```" + "\n";
+                foreach (string tip in champ.AllyTips)
                 {
                     output += tip + "\n";
                 }
