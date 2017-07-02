@@ -266,7 +266,7 @@ namespace SmellyDiscordBot
                 await e.Channel.SendMessage("The changes to the settings file were saved!");
             });
             #endregion
-            #region League
+            #region League of Legends
             commands.CreateCommand("level").Parameter("message", ParameterType.Multiple).Do(async(e) => 
             {
                 if (stats == null)
@@ -291,7 +291,24 @@ namespace SmellyDiscordBot
                     stats = new LeagueStats(Properties.Default.riotAPIkey);
                 await stats.GetLeagueStatus(e);
             });
-            AddCommand("status", String.Format("Inproper use of the command *{0}status*. It should look like this: *{0}status <REGION>*.", Properties.Default.prefix));
+            commands.CreateCommand("stats").Parameter("message", ParameterType.Multiple).Do(async(e) =>
+            {
+                if (stats == null)
+                    stats = new LeagueStats(Properties.Default.riotAPIkey);
+                await stats.GetChampionStats(e);
+            });
+            commands.CreateCommand("lore").Parameter("message", ParameterType.Required).Do(async (e) =>
+            {
+                if (stats == null)
+                    stats = new LeagueStats(Properties.Default.riotAPIkey);
+                await stats.GetChampionLore(e);
+            });
+            commands.CreateCommand("counter").Parameter("message", ParameterType.Required).Do(async (e) => 
+            {
+                if (stats == null)
+                    stats = new LeagueStats(Properties.Default.riotAPIkey);
+                await stats.GetChampionCounter(e);
+            });
             #endregion
         }
 

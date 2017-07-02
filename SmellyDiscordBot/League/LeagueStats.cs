@@ -1,5 +1,8 @@
 ﻿using Discord.Commands;
 using RiotSharp;
+using RiotSharp.CurrentGameEndpoint;
+using RiotSharp.StaticDataEndpoint;
+using RiotSharp.SummonerEndpoint;
 using SmellyDiscordBot.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -83,7 +86,7 @@ namespace SmellyDiscordBot.League
                     summonerName = String.Format("{0} {1}", summonerName, input[i]);
             }
 
-            RiotSharp.SummonerEndpoint.Summoner summoner = null;
+            Summoner summoner = null;
 
             try
             {
@@ -133,8 +136,8 @@ namespace SmellyDiscordBot.League
                 string[] summoners = new string[10];
                 Region region = GetRegion(regionString);
 
-                List<RiotSharp.CurrentGameEndpoint.Participant> blueTeam = new List<RiotSharp.CurrentGameEndpoint.Participant>();
-                List<RiotSharp.CurrentGameEndpoint.Participant> redTeam = new List<RiotSharp.CurrentGameEndpoint.Participant>();
+                List<Participant> blueTeam = new List<Participant>();
+                List<Participant> redTeam = new List<Participant>();
                 for (int i = 0; i < currentGame.Participants.Count; i++)
                 {
                     if (currentGame.Participants[i].TeamId == 100)
@@ -156,7 +159,7 @@ namespace SmellyDiscordBot.League
                     int emptySlots = 10;
                     emptySlots -= redTeam.Count;
                     emptySlots -= blueTeam.Count;
-                    RiotSharp.CurrentGameEndpoint.Participant emptyParticipant = new RiotSharp.CurrentGameEndpoint.Participant();
+                    Participant emptyParticipant = new Participant();
 
                     for (int i = 0; i < emptySlots / 2; i++)
                     {
@@ -238,7 +241,181 @@ namespace SmellyDiscordBot.League
                 await e.Channel.SendMessage(ex.Message);
             }
         }
-        
+
+        /// <summary>
+        /// Fetches specific champion info from Riot API.
+        /// </summary>
+        /// <param name="e">The command event which was executed.</param>
+        /// <returns>A message in the channel with information regarding the requested champion.</returns>
+        public async Task GetChampionStats(CommandEventArgs e)
+        {
+            var input = Utils.ReturnInputParameterStringArray(e);
+            string championname = input[0].ToLower();
+            try
+            {
+                ChampionStatic champ = GetChampion(Region.na, championname);
+                string output = String.Format("Riot's ratings for **{0}**, *{1}*", champ.Name, champ.Title) + "\n \n";
+
+                //Riot Ratings
+                output += "*Tags:* ";
+                foreach (var tag in champ.Tags)
+                {
+                    output += tag + " ";
+                }
+                output += "\n \n";
+                output += "*Attack*".PadRight(15);
+                for (int i = 0; i < champ.Info.Attack; i++)
+                {
+                    output += ":crossed_swords: ";
+                }
+                output += "\n";
+
+                output += "*Defence*".PadRight(15);
+                for (int i = 0; i < champ.Info.Defense; i++)
+                {
+                    output += ":shield: ";
+                }
+                output += "\n";
+
+                output += "*Magic*".PadRight(15);
+                for (int i = 0; i < champ.Info.Defense; i++)
+                {
+                    output += ":sparkles: ";
+                }
+                output += "\n";
+
+                output += "*Difficulty*".PadRight(15);
+                for (int i = 0; i < champ.Info.Difficulty; i++)
+                {
+                    output += ":star: ";
+                }
+                output += "\n";
+
+                //Stats
+                output += "\n **Base Stats**";
+                output += "```" + "\n";
+                //Health
+                output += String.Format("Health: {0} (+{1} Health/5s)", 
+                            champ.Stats.Hp.ToString(System.Globalization.CultureInfo.InvariantCulture), 
+                            champ.Stats.HpRegen.ToString(System.Globalization.CultureInfo.InvariantCulture)).PadRight(40)
+                        + String.Format(" - Growth/Level: {0}  (+{1} Health/5s)", 
+                            champ.Stats.HpPerLevel.ToString(System.Globalization.CultureInfo.InvariantCulture), 
+                            champ.Stats.HpRegenPerLevel.ToString(System.Globalization.CultureInfo.InvariantCulture)) + "\n";
+                //Resource
+                output += String.Format("{0}: {1} (+{2} {0}/5s)",
+                            champ.Partype,
+                            champ.Stats.Mp.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                            champ.Stats.MpRegen.ToString(System.Globalization.CultureInfo.InvariantCulture)).PadRight(40)
+                        + String.Format(" - Growth/Level: {0}  (+{1} {2}/5s)", 
+                            champ.Stats.MpPerLevel.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                            champ.Stats.MpRegenPerLevel.ToString(System.Globalization.CultureInfo.InvariantCulture) ,
+                            champ.Partype) + "\n";
+                output += "\n";
+                //Defences
+                output += String.Format("Armor: {0}", champ.Stats.Armor).PadRight(40)
+                        + String.Format(" - Growth/Level: {0}", champ.Stats.ArmorPerLevel.ToString(System.Globalization.CultureInfo.InvariantCulture)) + "\n";
+                output += String.Format("Magic Resist: {0}", champ.Stats.SpellBlock).PadRight(40)
+                        + String.Format(" - Growth/Level: {0}", champ.Stats.SpellBlockPerLevel.ToString(System.Globalization.CultureInfo.InvariantCulture)) + "\n";
+                output += "\n";
+                //Attack
+                output += String.Format("Attack Damage: {0}", champ.Stats.AttackDamage).PadRight(40)
+                        + String.Format(" - Growth/Level: {0}", champ.Stats.AttackDamagePerLevel) + "\n";
+                output += String.Format("Attack Speed: {0}", champ.Stats.AttackSpeedOffset).PadRight(40)
+                        + String.Format(" - Growth/Level: {0}", champ.Stats.AttackSpeedPerLevel) + "\n";
+                output += "\n";
+                output += String.Format("Attack Range: {0}", champ.Stats.AttackRange) + "\n";
+                output += String.Format("Movement Speed: {0}", champ.Stats.MoveSpeed) + "\n";
+                output += "```";
+
+                output += String.Format("**Passive**: *{0}* - {1}", champ.Passive.Name, champ.Passive.SanitizedDescription);
+                await e.Channel.SendMessage(output);
+            }
+            catch (RiotSharpException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            catch (IndexOutOfRangeException)
+            {
+                await Utils.InproperCommandUsageMessage(e, "champion", "chmapion <REGION> <CHAMPIONNAME>");
+            }
+            catch (NullReferenceException)
+            {
+                await e.Channel.SendMessage("Champion not found.");
+            }
+        }
+
+        /// <summary>
+        /// Fetches tips to counter a specific champion from Riot API.
+        /// </summary>
+        /// <param name="e">The command event which was executed.</param>
+        /// <returns>A message in the channel with information regarding the ways to counter the champion.</returns>
+        public async Task GetChampionCounter(CommandEventArgs e)
+        {
+            var input = Utils.ReturnInputParameterStringArray(e);
+            string championname = input[0].ToLower();
+            try
+            {
+                ChampionStatic champ = GetChampion(Region.na, championname);
+                string output = String.Format("Tips for playing against **{0}**:", champ.Name);
+                output += "```" + "\n";
+                foreach (string tip in champ.EnemyTips)
+                {
+                    output += tip + "\n";
+                }
+                output += "```";
+                await e.Channel.SendMessage(output);
+            }
+            catch (RiotSharpException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            catch (IndexOutOfRangeException)
+            {
+                await Utils.InproperCommandUsageMessage(e, "counter", "counter <CHAMPIONNAME>");
+            }
+            catch (NullReferenceException)
+            {
+                await e.Channel.SendMessage("Champion not found.");
+            }
+        }
+
+        /// <summary>
+        /// Fetches the lore for a specific champion.
+        /// </summary>
+        /// <param name="e">The command event which was executed.</param>
+        /// <returns>A message in the channel with lore regarding the requested champion.</returns>
+        public async Task GetChampionLore(CommandEventArgs e)
+        {
+            var input = Utils.ReturnInputParameterStringArray(e);
+            string championname = input[0].ToLower();
+            try
+            {
+                var champ = GetChampion(Region.na, championname);
+                string output = String.Format("Champion lore for **{0}**, *{1}*. \n", champ.Name, champ.Title);
+                output += champ.Lore;
+                output = output.Replace("<br>", " \n");
+                if (output.Length > 2000)
+                {
+                    await e.Channel.SendMessage(output.Substring(0, 2000));
+                    await e.Channel.SendMessage(output.Substring(2000));
+                }
+                else
+                    await e.Channel.SendMessage(output);
+            }
+            catch (RiotSharpException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            catch (IndexOutOfRangeException)
+            {
+                await Utils.InproperCommandUsageMessage(e, "champion", "chmapion <REGION> <CHAMPIONNAME>");
+            }
+            catch (NullReferenceException)
+            {
+                await e.Channel.SendMessage("Champion not found.");
+            }
+        }
+
         /// <summary>
         /// Converts the string input to a RiotSharp.Region.
         /// </summary>
@@ -344,9 +521,9 @@ namespace SmellyDiscordBot.League
         /// <param name="region">The region this Summoner is part of.</param>
         /// <param name="summonerName">The name of the Summoner.</param>
         /// <returns>The Summoner with the given name within the given region.</returns>
-        private RiotSharp.SummonerEndpoint.Summoner GetSummoner(string region, string summonerName)
+        private Summoner GetSummoner(string region, string summonerName)
         {
-            RiotSharp.SummonerEndpoint.Summoner summoner = null;
+            Summoner summoner = null;
             try
             {
                 summoner = api.GetSummoner(GetRegion(region), summonerName);
@@ -356,6 +533,29 @@ namespace SmellyDiscordBot.League
                 throw new SummonerNotFoundException("This Summoner does not exist in this region.");
             }
             return summoner;
+        }
+
+        /// <summary>
+        /// Fetches a Champion from the static RiotAPI.
+        /// </summary>
+        /// <param name="region">The region where the information should be fetched from.</param>
+        /// <param name="championName">The name of the champion.</param>
+        /// <returns></returns>
+        private ChampionStatic GetChampion(Region region, string championName)
+        {
+            if ("tf".Equals(championName.ToLower()))
+                championName = "Twisted Fate";
+            else if ("asol".Equals(championName.ToLower()))
+                championName = "Aurelion Sol";
+            var champions = staticApi.GetChampions(region, ChampionData.all).Champions.Values;
+            foreach (var champ in champions)
+            {
+                if (champ.Name.ToLower().Contains(championName.ToLower()))
+                {
+                    return champ;
+                }
+            }
+            return null;
         }
     }
 }
