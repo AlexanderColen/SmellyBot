@@ -5,7 +5,7 @@
     <Setting Name="welcomeChannel" Type="System.String" Scope="User">
       <Value Profile="(Default)">welcome</Value>
     </Setting>
-    <Setting Name="botToken" Type="System.String" Scope="User">
+    <Setting Name="botToken" Type="System.String" Scope="Application">
       <Value Profile="(Default)">MzE0ODIwMjU5NDE4OTk2NzM2.DDW2Ew.u_uJQvSxXF-ki1QWe5O_YShMyEM</Value>
     </Setting>
     <Setting Name="prefix" Type="System.Char" Scope="User">
@@ -23,7 +23,7 @@
     <Setting Name="roleEvents" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="riotAPIkey" Type="System.String" Scope="User">
+    <Setting Name="riotAPIkey" Type="System.String" Scope="Application">
       <Value Profile="(Default)">unknown</Value>
     </Setting>
   </Settings>

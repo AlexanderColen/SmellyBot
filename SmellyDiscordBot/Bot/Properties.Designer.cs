@@ -35,15 +35,12 @@ namespace SmellyDiscordBot.Bot {
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("MzE0ODIwMjU5NDE4OTk2NzM2.DDW2Ew.u_uJQvSxXF-ki1QWe5O_YShMyEM")]
         public string botToken {
             get {
                 return ((string)(this["botToken"]));
-            }
-            set {
-                this["botToken"] = value;
             }
         }
         
@@ -107,15 +104,12 @@ namespace SmellyDiscordBot.Bot {
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("unknown")]
         public string riotAPIkey {
             get {
                 return ((string)(this["riotAPIkey"]));
-            }
-            set {
-                this["riotAPIkey"] = value;
             }
         }
     }

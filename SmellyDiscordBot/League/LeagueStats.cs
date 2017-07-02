@@ -133,10 +133,25 @@ namespace SmellyDiscordBot.League
                         redTeam.Add(player);
                 }
 
+                //Fill up empty slots.
+                if (currentGame.Participants.Count < 10)
+                {
+                    int emptySlots = 10;
+                    emptySlots -= redTeam.Count;
+                    emptySlots -= blueTeam.Count;
+
+                    for (int i = 0; i < emptySlots / 2; i++)
+                    {
+                        redTeam.Add(new RiotSharp.CurrentGameEndpoint.Participant());
+                        blueTeam.Add(new RiotSharp.CurrentGameEndpoint.Participant());
+                    }
+                }
+
                 int minutes = (Int32) currentGame.GameLength / 60;
                 int seconds = (Int32) currentGame.GameLength % 60;
 
-                string output = String.Format("*{0}* is currently in a game of **{1}**.", summoner.Name, currentGame.GameMode) + "\n"
+                //Information to display.
+                string output = String.Format("*{0}* is currently in a game of **{1}** on {2}.", summoner.Name, currentGame.GameMode, currentGame.MapType) + "\n"
                                                + String.Format("This match started at *{0}* and has been going on for **{1}:{2}** (+ ~ 5 minutes).", 
                                                     currentGame.GameStartTime.ToShortTimeString(), 
                                                     minutes.ToString().PadLeft(2, '0'), 
