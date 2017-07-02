@@ -202,6 +202,7 @@ namespace SmellyDiscordBot.League
             {
                 string output = "Checking status of: **" + GetRegion(regionString) + "** server. \n ```";
                 var shardStatuses = statusApi.GetShardStatus(GetRegion(regionString));
+                shardStatuses = statusApi.GetShardStatus(Region.global);
                 foreach (var service in shardStatuses.Services)
                 {
                     output += String.Format("Status of {0}: {1}. ({2} incidents happened)", service.Name, service.Status, service.Incidents.Count) + "\n";
@@ -211,7 +212,11 @@ namespace SmellyDiscordBot.League
             }
             catch (RiotSharpException)
             {
-                await Utils.InproperCommandUsageMessage(e, "status", "status <REGION>");
+                await e.Channel.SendMessage("Something went wrong that shouldn't have gone wrong...");
+            }
+            catch (RegionNotFoundException ex)
+            {
+                await e.Channel.SendMessage(ex.Message);
             }
         }
 
