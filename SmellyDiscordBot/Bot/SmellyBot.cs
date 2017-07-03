@@ -51,6 +51,7 @@ namespace SmellyDiscordBot
             client.ExecuteAndWait(async () =>
             {
                 await client.Connect(Properties.Default.botToken, TokenType.Bot);
+                client.SetGame(String.Format("{0}help", Properties.Default.prefix));
             });
         }
 
@@ -179,25 +180,36 @@ namespace SmellyDiscordBot
         /// </summary>
         private void AddAllCommands()
         {
-            #region Adding basic commands with responses
+            #region Basic Commands With Responses
             #region Dokus
             AddCommand("Dokus", "Did you mean yourself?");
             AddCommand("dokus", "Did you mean yourself?");
             AddCommand("DOKUS", "No need to yell, dokus!");
             #endregion
-            //AddCommand("test", "<:chiya:299559728307109888>");
             #endregion
+            #region Help Commands
+            commands.CreateCommand("help").Do(async (e) => 
+            {
+                string output = String.Format("Helpful commands for {0} in {1}. (NOTE: Lowercase is key!)", client.CurrentUser.Name, e.Server.Name)
+                                +"``` \n"
+                                + "    !help".PadRight(20) + "Displays this message again with commands. \n"
+                                + "    !gambling".PadRight(20) + "Shows all the gambling commands. \n"
+                                + "    !league".PadRight(20) + "Shows all the league commands. \n"
+                                + "    !Roles".PadRight(20) + "Shows all the roles commands. \n"
+                                + "    !admin".PadRight(20) + "Shows all the admin commands. \n"
+                                + "```";
+                await e.Channel.SendMessage(output);
+            });
+            //TODO Add explanation commands for Gambling.
+            //TODO Add explanation commands for League.
+            //TODO Add explanation commands for Roles.
+            //TODO Add explanation commands for Admins.
+            #endregion
+            #region Gambling
             #region Slot Machine
             commands.CreateCommand("slots").Do(async (e) =>
             {
                 await Casino.Slots(e);
-            });
-            #endregion
-            #region Disconnect Command
-            commands.CreateCommand("disconnect").Do(async (e) =>
-            {
-                await e.Channel.SendMessage(string.Format("{0} signing out.", client.CurrentUser.Name));
-                await client.Disconnect();
             });
             #endregion
             #region Random Roll
@@ -206,49 +218,101 @@ namespace SmellyDiscordBot
                 await Casino.Roll(e);
             });
             #endregion
+            #endregion
+            #region Admin Commands
             #region Toggle Events
             commands.CreateCommand("toggleall").Do(async (e) =>
             {
-                Properties.Default.userEvents = !Properties.Default.userEvents;
-                Properties.Default.channelEvents = !Properties.Default.channelEvents;
-                Properties.Default.roleEvents = !Properties.Default.roleEvents;
-                await e.Channel.SendMessage(ToggleEvents(eventType.user));
-                await e.Channel.SendMessage(ToggleEvents(eventType.channel));
-                await e.Channel.SendMessage(ToggleEvents(eventType.role));
+                if (e.User.ServerPermissions.Administrator)
+                {
+                    Properties.Default.userEvents = !Properties.Default.userEvents;
+                    Properties.Default.channelEvents = !Properties.Default.channelEvents;
+                    Properties.Default.roleEvents = !Properties.Default.roleEvents;
+                    await e.Channel.SendMessage(ToggleEvents(eventType.user));
+                    await e.Channel.SendMessage(ToggleEvents(eventType.channel));
+                    await e.Channel.SendMessage(ToggleEvents(eventType.role));
+                }
             });
             commands.CreateCommand("toggleuser").Do(async (e) =>
             {
-                Properties.Default.userEvents = !Properties.Default.userEvents;
-                await e.Channel.SendMessage(ToggleEvents(eventType.user));
+                if (e.User.ServerPermissions.Administrator)
+                {
+                    Properties.Default.userEvents = !Properties.Default.userEvents;
+                    await e.Channel.SendMessage(ToggleEvents(eventType.user));
+                }
             });
             commands.CreateCommand("togglechannel").Do(async (e) =>
             {
-                Properties.Default.channelEvents = !Properties.Default.channelEvents;
-                await e.Channel.SendMessage(ToggleEvents(eventType.channel));
+                if (e.User.ServerPermissions.Administrator)
+                {
+                    Properties.Default.channelEvents = !Properties.Default.channelEvents;
+                    await e.Channel.SendMessage(ToggleEvents(eventType.channel));
+                }
             });
             commands.CreateCommand("togglerole").Do(async (e) =>
             {
-                Properties.Default.roleEvents = !Properties.Default.roleEvents;
-                await e.Channel.SendMessage(ToggleEvents(eventType.role));
+                if (e.User.ServerPermissions.Administrator)
+                {
+                    Properties.Default.roleEvents = !Properties.Default.roleEvents;
+                    await e.Channel.SendMessage(ToggleEvents(eventType.role));
+                }
             });
             commands.CreateCommand("toggleuser").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
-                await ToggleSpecificEvent(e);
+                if (e.User.ServerPermissions.Administrator)
+                    await ToggleSpecificEvent(e);
             });
             commands.CreateCommand("togglechannel").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
-                await ToggleSpecificEvent(e);
+                if (e.User.ServerPermissions.Administrator)
+                    await ToggleSpecificEvent(e);
             });
             commands.CreateCommand("togglerole").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
-                await ToggleSpecificEvent(e);
+                if (e.User.ServerPermissions.Administrator)
+                    await ToggleSpecificEvent(e);
             });
             #endregion
             #region Create Basic Command
             commands.CreateCommand("addcommand").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
-                await AddCommand(e);
+                if (e.User.ServerPermissions.Administrator)
+                    await AddCommand(e);
             });
+            #endregion
+            #region Save changes to properties.
+            commands.CreateCommand("save").Do(async (e) => {
+                if (e.User.ServerPermissions.Administrator)
+                {
+                    Properties.Default.Save();
+                    await e.Channel.SendMessage("The changes to the settings file were saved!");
+                }
+            });
+            #endregion
+            #region Disconnect Command
+            commands.CreateCommand("disconnect").Do(async (e) =>
+            {
+                if (e.User.ServerPermissions.Administrator)
+                {
+                    await e.Channel.SendMessage(string.Format("{0} signing out.", client.CurrentUser.Name));
+                    await client.Disconnect();
+                }
+            });
+            #endregion
+            #region Set SmellyBot's Game
+            commands.CreateCommand("setgame").Parameter("message", ParameterType.Multiple).Do((e) => 
+            {
+                if (e.User.ServerPermissions.Administrator)
+                {
+                    string game = "";
+                    foreach (string s in Utils.ReturnInputParameterStringArray(e))
+                    {
+                        game += s.PadRight(1);
+                    }
+                    client.SetGame(game);
+                }
+            });
+            #endregion
             #endregion
             #region Request Role Addition/Removal
             commands.CreateCommand("assignrole").Parameter("message", ParameterType.Multiple).Do(async (e) =>
@@ -258,12 +322,6 @@ namespace SmellyDiscordBot
             commands.CreateCommand("removerole").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
                 await Utils.RemoveRole(e);
-            });
-            #endregion
-            #region Save changes to properties.
-            commands.CreateCommand("save").Do(async (e) => {
-                Properties.Default.Save();
-                await e.Channel.SendMessage("The changes to the settings file were saved!");
             });
             #endregion
             #region League of Legends
@@ -389,6 +447,12 @@ namespace SmellyDiscordBot
             var channel = e.Server.FindChannels(Properties.Default.welcomeChannel, ChannelType.Text).FirstOrDefault();
 
             await channel.SendMessage(string.Format("{0} has joined a channel!", e.User.Name));
+
+            string output = "Is it just me or does it smell in here? \n"
+                            + "Oh wait... it is me... Erm... *cough* \n \n"
+                            + String.Format("Hi, {0}! I am **{1}**, a Discord bot from **{2}**.", e.User.Nickname, client.CurrentUser.Name, e.Server.Name)
+                            + "Type !help for a list of commands that can be used in the server.";
+            await e.User.SendMessage(output);
         }
 
         /// <summary>
