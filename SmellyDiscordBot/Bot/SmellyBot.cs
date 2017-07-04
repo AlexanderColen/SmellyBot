@@ -190,19 +190,40 @@ namespace SmellyDiscordBot
             #region Help Commands
             commands.CreateCommand("help").Do(async (e) => 
             {
-                string output = String.Format("Helpful commands for {0} in {1}. (NOTE: Lowercase is key!)", client.CurrentUser.Name, e.Server.Name)
+                string serverName = "servers";
+                if (e.Server != null)
+                {
+                    serverName = e.Server.Name;
+                }
+                string output = String.Format("Helpful commands for {0} in {1}. (NOTE: Lowercase is key!)", client.CurrentUser.Name, serverName)
                                 +"``` \n"
-                                + "    !help".PadRight(20) + "Displays this message again with commands. \n"
-                                + "    !gambling".PadRight(20) + "Shows all the gambling commands. \n"
-                                + "    !league".PadRight(20) + "Shows all the league commands. \n"
-                                + "    !Roles".PadRight(20) + "Shows all the roles commands. \n"
-                                + "    !admin".PadRight(20) + "Shows all the admin commands. \n"
+                                + String.Format("{0}help", Properties.Default.prefix).PadRight(20) + "Displays this message again with commands. \n"
+                                + String.Format("{0}gambling", Properties.Default.prefix).PadRight(20) + "Shows all the gambling commands. \n"
+                                + String.Format("{0}league", Properties.Default.prefix).PadRight(20) + "Shows all the league commands. \n"
+                                + String.Format("{0}roles", Properties.Default.prefix).PadRight(20) + "Shows all the roles commands. \n"
+                                + String.Format("{0}admin", Properties.Default.prefix).PadRight(20) + "Shows all the admin commands. \n"
                                 + "```";
-                await e.Channel.SendMessage(output);
+                await e.User.SendMessage(output);
             });
-            //TODO Add explanation commands for Gambling.
+            commands.CreateCommand("gambling").Do(async (e) =>
+            {
+                string output = "Commands regarding gambling. (NOTE: Lowercase is key!)"
+                                + "``` \n"
+                                + String.Format("{0}roll <min>-<max>", Properties.Default.prefix).PadRight(25) + "Rolls a random number between the given minimum & maximum.".PadRight(60) + String.Format("Example: {0}roll 1-100", Properties.Default.prefix) + "\n"
+                                + String.Format("{0}slots", Properties.Default.prefix).PadRight(25) + "Generates a play on a slotmachine.".PadRight(60) + "\n"
+                                + "```";
+                await e.User.SendMessage(output);
+            });
             //TODO Add explanation commands for League.
-            //TODO Add explanation commands for Roles.
+            commands.CreateCommand("roles").Do(async (e) =>
+            {
+                string output = "Commands regarding roles. (NOTE: Lowercase is key!)"
+                                + "``` \n"
+                                + String.Format("{0}assignrole <role1> <role2>", Properties.Default.prefix).PadRight(25) + "Assigns the requested role(s) to the user.".PadRight(60) + String.Format("Example: {0}assignrole Bot", Properties.Default.prefix) + "\n"
+                                + String.Format("{0}removerole <role1> <role2>", Properties.Default.prefix).PadRight(25) + "Removes the mentioned role(s) from the user.".PadRight(60) + String.Format("Example: {0}removerole Bot", Properties.Default.prefix) + "\n"
+                                + "```";
+                await e.User.SendMessage(output);
+            });
             //TODO Add explanation commands for Admins.
             #endregion
             #region Gambling
