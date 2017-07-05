@@ -205,40 +205,63 @@ namespace SmellyDiscordBot
                                 + "```";
                 await e.User.SendMessage(output);
             });
+            //TODO Add explanation commands for Admins.
             commands.CreateCommand("gambling").Do(async (e) =>
             {
-                string output = "Commands regarding gambling. (NOTE: Lowercase is key!)"
+                string output = "Commands regarding Gambling. (NOTE: Lowercase is key!)"
                                 + "``` \n"
-                                + String.Format("{0}roll <min>-<max>", Properties.Default.prefix).PadRight(25) + "Rolls a random number between the given minimum & maximum.".PadRight(60) + String.Format("Example: {0}roll 1-100", Properties.Default.prefix) + "\n"
-                                + String.Format("{0}slots", Properties.Default.prefix).PadRight(25) + "Generates a play on a slotmachine.".PadRight(60) + "\n"
+                                + String.Format("{0}roll <min>-<max>", Properties.Default.prefix).PadRight(25) 
+                                                + "Rolls a random number between the given minimum & maximum.".PadRight(60) 
+                                                + String.Format("Example: {0}roll 1-100", Properties.Default.prefix) + "\n"
+                                + String.Format("{0}slots", Properties.Default.prefix).PadRight(25) 
+                                                + "Generates a play on a slotmachine.".PadRight(60) + "\n"
                                 + "```";
                 await e.User.SendMessage(output);
             });
-            //TODO Add explanation commands for League.
+            commands.CreateCommand("league").Do(async (e) =>
+            {
+                string output = "Commands regarding League of Legends. (NOTE: Lowercase is key!)"
+                                + "``` \n"
+                                + String.Format("{0}level <region> <summoner>", Properties.Default.prefix).PadRight(35) 
+                                                + "Shows the level of the summoner in the region.".PadRight(95) 
+                                                + String.Format("Example: {0}level na xxRivenMaster98xx", Properties.Default.prefix) + "\n"
+                                + String.Format("{0}rank <region> <summoner>", Properties.Default.prefix).PadRight(35) 
+                                                + "Shows the rank(s) of the summoner in the region.".PadRight(95) 
+                                                + String.Format("Example: {0}rank na xxRivenMaster98xx", Properties.Default.prefix) + "\n"
+                                + String.Format("{0}currentgame <region> <summoner>", Properties.Default.prefix).PadRight(35) 
+                                                + "Displays information regarding the current game that the summoner in the region is playing.".PadRight(95) 
+                                                + String.Format("Example: {0}currentgame na xxRivenMaster98xx", Properties.Default.prefix) + "\n"
+                                + String.Format("{0}status <region>", Properties.Default.prefix).PadRight(35) 
+                                                + "Checks the status of the requested region.".PadRight(95) 
+                                                + String.Format("Example: {0}status euw", Properties.Default.prefix) + "\n"
+                                + String.Format("{0}stats <champion>", Properties.Default.prefix).PadRight(35) 
+                                                + "Fetches information for the champion.".PadRight(95) 
+                                                + String.Format("Example: {0}stats Nami", Properties.Default.prefix) + "\n"
+                                + String.Format("{0}counter <champion>", Properties.Default.prefix).PadRight(35) 
+                                                + "Shows Riot's tips for playing against a certain champion.".PadRight(95) 
+                                                + String.Format("Example: {0}counter Draven", Properties.Default.prefix) + "\n"
+                                + String.Format("{0}howto <champion>", Properties.Default.prefix).PadRight(35) 
+                                                + "Shows Riot's tips for playing a certain champion.".PadRight(95) 
+                                                + String.Format("Example: {0}howto Yasuo", Properties.Default.prefix) + "\n"
+                                + String.Format("{0}lore <champion>", Properties.Default.prefix).PadRight(35) 
+                                                + "Displays the lore of a champion.".PadRight(95) 
+                                                + String.Format("Example: {0}lore Teemo", Properties.Default.prefix) + "\n"
+                                + "```";
+                await e.User.SendMessage(output);
+            });
             commands.CreateCommand("roles").Do(async (e) =>
             {
-                string output = "Commands regarding roles. (NOTE: Lowercase is key!)"
+                string output = "Commands regarding Roles. (NOTE: Lowercase is key!)"
                                 + "``` \n"
-                                + String.Format("{0}assignrole <role1> <role2>", Properties.Default.prefix).PadRight(25) + "Assigns the requested role(s) to the user.".PadRight(60) + String.Format("Example: {0}assignrole Bot", Properties.Default.prefix) + "\n"
-                                + String.Format("{0}removerole <role1> <role2>", Properties.Default.prefix).PadRight(25) + "Removes the mentioned role(s) from the user.".PadRight(60) + String.Format("Example: {0}removerole Bot", Properties.Default.prefix) + "\n"
+                                + String.Format("{0}assignrole <role1> <role2>", Properties.Default.prefix).PadRight(25) 
+                                                + "Assigns the requested role(s) to the user.".PadRight(60) 
+                                                + String.Format("Example: {0}assignrole Bot", Properties.Default.prefix) + "\n"
+                                + String.Format("{0}removerole <role1> <role2>", Properties.Default.prefix).PadRight(25) 
+                                                + "Removes the mentioned role(s) from the user.".PadRight(60) 
+                                                + String.Format("Example: {0}removerole Bot", Properties.Default.prefix) + "\n"
                                 + "```";
                 await e.User.SendMessage(output);
             });
-            //TODO Add explanation commands for Admins.
-            #endregion
-            #region Gambling
-            #region Slot Machine
-            commands.CreateCommand("slots").Do(async (e) =>
-            {
-                await Casino.Slots(e);
-            });
-            #endregion
-            #region Random Roll
-            commands.CreateCommand("roll").Parameter("message", ParameterType.Multiple).Do(async (e) =>
-            {
-                await Casino.Roll(e);
-            });
-            #endregion
             #endregion
             #region Admin Commands
             #region Toggle Events
@@ -321,7 +344,7 @@ namespace SmellyDiscordBot
             });
             #endregion
             #region Set SmellyBot's Game
-            commands.CreateCommand("setgame").Parameter("message", ParameterType.Multiple).Do((e) => 
+            commands.CreateCommand("setgame").Parameter("message", ParameterType.Multiple).Do((e) =>
             {
                 if (e.User.ServerPermissions.Administrator)
                 {
@@ -332,6 +355,20 @@ namespace SmellyDiscordBot
                     }
                     client.SetGame(game);
                 }
+            });
+            #endregion
+            #endregion
+            #region Gambling
+            #region Slot Machine
+            commands.CreateCommand("slots").Do(async (e) =>
+            {
+                await Casino.Slots(e);
+            });
+            #endregion
+            #region Random Roll
+            commands.CreateCommand("roll").Parameter("message", ParameterType.Multiple).Do(async (e) =>
+            {
+                await Casino.Roll(e);
             });
             #endregion
             #endregion
@@ -376,12 +413,6 @@ namespace SmellyDiscordBot
                     stats = new LeagueStats(Properties.Default.riotAPIkey);
                 await stats.GetChampionStats(e);
             });
-            commands.CreateCommand("lore").Parameter("message", ParameterType.Required).Do(async (e) =>
-            {
-                if (stats == null)
-                    stats = new LeagueStats(Properties.Default.riotAPIkey);
-                await stats.GetChampionLore(e);
-            });
             commands.CreateCommand("counter").Parameter("message", ParameterType.Required).Do(async (e) => 
             {
                 if (stats == null)
@@ -393,6 +424,12 @@ namespace SmellyDiscordBot
                 if (stats == null)
                     stats = new LeagueStats(Properties.Default.riotAPIkey);
                 await stats.GetChampionTips(e);
+            });
+            commands.CreateCommand("lore").Parameter("message", ParameterType.Required).Do(async (e) =>
+            {
+                if (stats == null)
+                    stats = new LeagueStats(Properties.Default.riotAPIkey);
+                await stats.GetChampionLore(e);
             });
             #endregion
         }

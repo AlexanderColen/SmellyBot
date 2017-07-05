@@ -127,7 +127,16 @@ namespace SmellyDiscordBot.League
         {
             var input = Utils.ReturnInputParameterStringArray(e);
             string regionString = input[0];
-            string summonerName = input[1];
+            string summonerName = "";
+
+            if (input.Length == 2)
+                summonerName = input[1];
+            else
+            {
+                summonerName = input[1];
+                for (int i = 2; i < input.Length; i++)
+                    summonerName = String.Format("{0} {1}", summonerName, input[i]);
+            }
 
             try
             {
@@ -251,6 +260,7 @@ namespace SmellyDiscordBot.League
         {
             var input = Utils.ReturnInputParameterStringArray(e);
             string championname = input[0].ToLower();
+
             try
             {
                 ChampionStatic champ = GetChampion(Region.na, championname);
@@ -426,7 +436,7 @@ namespace SmellyDiscordBot.League
             try
             {
                 var champ = GetChampion(Region.na, championname);
-                string output = String.Format("Champion lore for **{0}**, *{1}*. \n", champ.Name, champ.Title);
+                string output = String.Format("Champion lore for **{0}**, *{1}*. \n \n", champ.Name, champ.Title);
                 output += champ.Lore;
                 output = output.Replace("<br>", " \n");
                 if (output.Length > 2000)
