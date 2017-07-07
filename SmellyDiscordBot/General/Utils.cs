@@ -27,7 +27,9 @@ namespace SmellyDiscordBot
             string[] input = new string[e.Args.Length];
 
             for (int i = 0; i < e.Args.Length; i++)
+            {
                 input[i] = e.Args[i].ToString();
+            }
 
             return input;
         }
@@ -53,12 +55,13 @@ namespace SmellyDiscordBot
         {
             string[] input = Utils.ReturnInputParameterStringArray(e);
             for (int i = 0; i < input.Length; i++)
+            {
                 foreach (Role r in e.Server.FindRoles(input[i]))
                 {
                     System.Threading.Thread.Sleep(500);
                     await e.User.AddRoles(r);
                 }
-
+            }
             await e.Channel.SendMessage(string.Format("The role(s) have been assigned, *{0}*.", Utils.FetchUserName(e)));
         }
 
@@ -72,11 +75,13 @@ namespace SmellyDiscordBot
             string[] input = Utils.ReturnInputParameterStringArray(e);
 
             for (int i = 0; i < input.Length; i++)
+            {
                 foreach (Role r in e.Server.FindRoles(input[i]))
                 {
                     System.Threading.Thread.Sleep(500);
                     await e.User.RemoveRoles(r);
                 }
+            }
 
             await e.Channel.SendMessage(string.Format("The role(s) have been removed, *{0}*.", Utils.FetchUserName(e)));
         }

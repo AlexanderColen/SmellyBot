@@ -72,9 +72,13 @@ namespace SmellyDiscordBot
 
                 //Meaning that there are more given parameters than necessary.
                 if (input.Length >= 3)
+                {
                     throw new UnusedParametersException("Too many parameters were given.");
+                }
                 else if (input.Length <= 1)
+                {
                     throw new UnusedParametersException("Too few parameters were given.");
+                }
 
                 eventType eventtype = eventType.none;
 
@@ -97,9 +101,13 @@ namespace SmellyDiscordBot
                 Properties.Default.welcomeChannel = secondParameter;
 
                 if (eventtype != eventType.none)
+                {
                     await e.Channel.SendMessage(ToggleEvents(eventtype));
+                }
                 else
+                {
                     throw new UnknownEventException("Event not found.");
+                }
             }
             catch (Exception ex) when (ex is UnusedParametersException || ex is IndexOutOfRangeException)
             {
@@ -126,14 +134,22 @@ namespace SmellyDiscordBot
             string response = "";
 
             for (int i = 1; i < input.Length; i++)
+            {
                 response += input[i] + " ";
+            }
 
             if (input.Length <= 1)
+            {
                 throw new UnusedParametersException("Too few parameters were given.");
+            }
 
             foreach (Command c in commands.AllCommands)
+            {
                 if (c.Text.Contains(command))
+                {
                     throw new DuplicateCommandException("Duplicate command attempted to be added.");
+                }
+            }
 
             try
             {
@@ -206,6 +222,7 @@ namespace SmellyDiscordBot
                                 + "```";
                 await e.User.SendMessage(output);
             });
+
             commands.CreateCommand("admin").Do(async (e) =>
             {
                 string output = "Commands regarding Admin, can only be used by people with administrator privileges. (NOTE: Lowercase is key!)"
@@ -236,6 +253,7 @@ namespace SmellyDiscordBot
                                 + "```";
                 await e.User.SendMessage(output);
             });
+
             commands.CreateCommand("gambling").Do(async (e) =>
             {
                 string output = "Commands regarding Gambling. (NOTE: Lowercase is key!)"
@@ -249,6 +267,7 @@ namespace SmellyDiscordBot
                                 + "```";
                 await e.User.SendMessage(output);
             });
+
             commands.CreateCommand("league").Do(async (e) =>
             {
                 string output = "Commands regarding League of Legends. (NOTE: Lowercase is key!)"
@@ -281,6 +300,7 @@ namespace SmellyDiscordBot
                                 + "```";
                 await e.User.SendMessage(output);
             });
+
             commands.CreateCommand("roles").Do(async (e) =>
             {
                 string output = "Commands regarding Roles. (NOTE: Lowercase is key!)"
@@ -310,6 +330,7 @@ namespace SmellyDiscordBot
                     await e.Channel.SendMessage(ToggleEvents(eventType.role));
                 }
             });
+
             commands.CreateCommand("toggleuser").Do(async (e) =>
             {
                 if (e.User.ServerPermissions.Administrator)
@@ -318,6 +339,7 @@ namespace SmellyDiscordBot
                     await e.Channel.SendMessage(ToggleEvents(eventType.user));
                 }
             });
+
             commands.CreateCommand("togglechannel").Do(async (e) =>
             {
                 if (e.User.ServerPermissions.Administrator)
@@ -326,6 +348,7 @@ namespace SmellyDiscordBot
                     await e.Channel.SendMessage(ToggleEvents(eventType.channel));
                 }
             });
+
             commands.CreateCommand("togglerole").Do(async (e) =>
             {
                 if (e.User.ServerPermissions.Administrator)
@@ -334,16 +357,19 @@ namespace SmellyDiscordBot
                     await e.Channel.SendMessage(ToggleEvents(eventType.role));
                 }
             });
+
             commands.CreateCommand("toggleuser").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
                 if (e.User.ServerPermissions.Administrator)
                     await ToggleSpecificEvent(e);
             });
+
             commands.CreateCommand("togglechannel").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
                 if (e.User.ServerPermissions.Administrator)
                     await ToggleSpecificEvent(e);
             });
+
             commands.CreateCommand("togglerole").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
                 if (e.User.ServerPermissions.Administrator)
@@ -354,7 +380,9 @@ namespace SmellyDiscordBot
             commands.CreateCommand("addcommand").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
                 if (e.User.ServerPermissions.Administrator)
+                {
                     await AddCommand(e);
+                }
             });
             #endregion
             #region Save changes to properties.
@@ -411,6 +439,7 @@ namespace SmellyDiscordBot
             {
                 await Utils.AssignRole(e);
             });
+
             commands.CreateCommand("removerole").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
                 await Utils.RemoveRole(e);
@@ -420,49 +449,72 @@ namespace SmellyDiscordBot
             commands.CreateCommand("level").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
                 if (stats == null)
+                {
                     stats = new LeagueStats(Properties.Default.riotAPIkey);
+                }
                 await stats.GetSummonerLevel(e);
             });
+
             commands.CreateCommand("rank").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
                 if (stats == null)
+                {
                     stats = new LeagueStats(Properties.Default.riotAPIkey);
+                }
                 await stats.GetSummonerRank(e);
             });
+
             commands.CreateCommand("currentgame").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
                 if (stats == null)
+                {
                     stats = new LeagueStats(Properties.Default.riotAPIkey);
+                }
                 await stats.GetCurrentGameStats(e);
             });
+
             commands.CreateCommand("status").Parameter("message", ParameterType.Required).Do(async (e) =>
             {
                 if (stats == null)
+                {
                     stats = new LeagueStats(Properties.Default.riotAPIkey);
+                }
                 await stats.GetLeagueStatus(e);
             });
+
             commands.CreateCommand("stats").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
                 if (stats == null)
+                {
                     stats = new LeagueStats(Properties.Default.riotAPIkey);
+                }
                 await stats.GetChampionStats(e);
             });
+
             commands.CreateCommand("counter").Parameter("message", ParameterType.Required).Do(async (e) =>
             {
                 if (stats == null)
+                {
                     stats = new LeagueStats(Properties.Default.riotAPIkey);
+                }
                 await stats.GetChampionCounter(e);
             });
+
             commands.CreateCommand("howto").Parameter("message", ParameterType.Required).Do(async (e) =>
             {
                 if (stats == null)
+                {
                     stats = new LeagueStats(Properties.Default.riotAPIkey);
+                }
                 await stats.GetChampionTips(e);
             });
+
             commands.CreateCommand("lore").Parameter("message", ParameterType.Required).Do(async (e) =>
             {
                 if (stats == null)
+                {
                     stats = new LeagueStats(Properties.Default.riotAPIkey);
+                }
                 await stats.GetChampionLore(e);
             });
             #endregion

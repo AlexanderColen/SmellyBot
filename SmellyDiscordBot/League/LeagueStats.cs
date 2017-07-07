@@ -42,12 +42,16 @@ namespace SmellyDiscordBot.League
             string summonerName = "";
 
             if (input.Length == 2)
+            {
                 summonerName = input[1];
+            }
             else
             {
                 summonerName = input[1];
                 for (int i = 2; i < input.Length; i++)
+                {
                     summonerName = String.Format("{0} {1}", summonerName, input[i]);
+                }
             }
 
             try
@@ -78,12 +82,16 @@ namespace SmellyDiscordBot.League
             string summonerName = "";
 
             if (input.Length == 2)
+            {
                 summonerName = input[1];
+            }
             else
             {
                 summonerName = input[1];
                 for (int i = 2; i < input.Length; i++)
+                {
                     summonerName = String.Format("{0} {1}", summonerName, input[i]);
+                }
             }
 
             Summoner summoner = null;
@@ -95,10 +103,12 @@ namespace SmellyDiscordBot.League
                 string output = String.Format("Ranked statistics for *{0}*: \n ```", summoner.Name);
 
                 foreach (RiotSharp.LeagueEndpoint.League league in summoner.GetLeagues())
-                    output += string.Format("\n {0} - {1} - {2}", 
-                                                league.Tier.ToString().PadRight(10), 
-                                                league.Name.ToString().PadRight(25), 
+                {
+                    output += string.Format("\n {0} - {1} - {2}",
+                                                league.Tier.ToString().PadRight(10),
+                                                league.Name.ToString().PadRight(25),
                                                 league.Queue);
+                }
                 output += "```";
 
                 await e.Channel.SendMessage(output);
@@ -130,12 +140,16 @@ namespace SmellyDiscordBot.League
             string summonerName = "";
 
             if (input.Length == 2)
+            {
                 summonerName = input[1];
+            }
             else
             {
                 summonerName = input[1];
                 for (int i = 2; i < input.Length; i++)
+                {
                     summonerName = String.Format("{0} {1}", summonerName, input[i]);
+                }
             }
 
             try
@@ -150,9 +164,13 @@ namespace SmellyDiscordBot.League
                 for (int i = 0; i < currentGame.Participants.Count; i++)
                 {
                     if (currentGame.Participants[i].TeamId == 100)
+                    {
                         blueTeam.Add(currentGame.Participants[i]);
+                    }
                     else if (currentGame.Participants[i].TeamId == 200)
+                    {
                         redTeam.Add(currentGame.Participants[i]);
+                    }
 
                     string champion = "";
                     if (currentGame.Participants[i].ChampionId != 0)
@@ -231,6 +249,7 @@ namespace SmellyDiscordBot.League
             {
                 Region region = GetRegion(regionString);
                 string output = "Checking status of: **" + region + "** server. \n ```";
+
                 var shardStatuses = statusApi.GetShardStatus(region);
                 shardStatuses = statusApi.GetShardStatus(region);
                 foreach (var service in shardStatuses.Services)
@@ -273,6 +292,7 @@ namespace SmellyDiscordBot.League
                     output += tag + " ";
                 }
                 output += "\n \n";
+
                 output += "*Attack*".PadRight(15);
                 for (int i = 0; i < champ.Info.Attack; i++)
                 {
@@ -311,6 +331,7 @@ namespace SmellyDiscordBot.League
                         + String.Format(" - Growth/Level: {0}  (+{1} Health/5s)", 
                             champ.Stats.HpPerLevel.ToString(System.Globalization.CultureInfo.InvariantCulture), 
                             champ.Stats.HpRegenPerLevel.ToString(System.Globalization.CultureInfo.InvariantCulture)) + "\n";
+
                 //Resource
                 output += String.Format("{0}: {1} (+{2} {0}/5s)",
                             champ.Partype,
@@ -321,12 +342,14 @@ namespace SmellyDiscordBot.League
                             champ.Stats.MpRegenPerLevel.ToString(System.Globalization.CultureInfo.InvariantCulture) ,
                             champ.Partype) + "\n";
                 output += "\n";
+
                 //Defences
                 output += String.Format("Armor: {0}", champ.Stats.Armor).PadRight(40)
                         + String.Format(" - Growth/Level: {0}", champ.Stats.ArmorPerLevel.ToString(System.Globalization.CultureInfo.InvariantCulture)) + "\n";
                 output += String.Format("Magic Resist: {0}", champ.Stats.SpellBlock).PadRight(40)
                         + String.Format(" - Growth/Level: {0}", champ.Stats.SpellBlockPerLevel.ToString(System.Globalization.CultureInfo.InvariantCulture)) + "\n";
                 output += "\n";
+
                 //Attack
                 output += String.Format("Attack Damage: {0}", champ.Stats.AttackDamage).PadRight(40)
                         + String.Format(" - Growth/Level: {0}", champ.Stats.AttackDamagePerLevel) + "\n";
@@ -368,6 +391,7 @@ namespace SmellyDiscordBot.League
                 ChampionStatic champ = GetChampion(Region.na, championname);
                 string output = String.Format("Tips for playing against **{0}**:", champ.Name);
                 output += "```" + "\n";
+
                 foreach (string tip in champ.EnemyTips)
                 {
                     output += tip + "\n";
@@ -403,6 +427,7 @@ namespace SmellyDiscordBot.League
                 ChampionStatic champ = GetChampion(Region.na, championname);
                 string output = String.Format("Tips for playing **{0}**:", champ.Name);
                 output += "```" + "\n";
+
                 foreach (string tip in champ.AllyTips)
                 {
                     output += tip + "\n";
@@ -439,13 +464,21 @@ namespace SmellyDiscordBot.League
                 string output = String.Format("Champion lore for **{0}**, *{1}*. \n \n", champ.Name, champ.Title);
                 output += champ.Lore;
                 output = output.Replace("<br>", " \n");
-                if (output.Length > 2000)
+
+                if (output.Length > 4000)
+                {
+                    await e.Channel.SendMessage(output.Substring(0, 2000));
+                    await e.Channel.SendMessage(output.Substring(2000, 4000));
+                    await e.Channel.SendMessage(output.Substring(4000));
+                }
+                else if(output.Length > 2000)
                 {
                     await e.Channel.SendMessage(output.Substring(0, 2000));
                     await e.Channel.SendMessage(output.Substring(2000));
                 }
-                else
+                else {
                     await e.Channel.SendMessage(output);
+                }
             }
             catch (RiotSharpException ex)
             {
@@ -474,36 +507,47 @@ namespace SmellyDiscordBot.League
                 case "br":
                     region = Region.br;
                     break;
+
                 case "eune":
                     region = Region.eune;
                     break;
+
                 case "euw":
                     region = Region.euw;
                     break;
+
                 case "jp":
                     region = Region.jp;
                     break;
+
                 case "kr":
                     region = Region.kr;
                     break;
+
                 case "lan":
                     region = Region.lan;
                     break;
+
                 case "las":
                     region = Region.las;
                     break;
+
                 case "na":
                     region = Region.na;
                     break;
+
                 case "oce":
                     region = Region.oce;
                     break;
+
                 case "ru":
                     region = Region.ru;
                     break;
+
                 case "tr":
                     region = Region.tr;
                     break;
+
                 default:
                     throw new RegionNotFoundException("This region does not exist (yet).");
             }
@@ -524,35 +568,46 @@ namespace SmellyDiscordBot.League
                 case "br":
                     platform = Platform.BR1;
                     break;
+
                 case "eune":
                     platform = Platform.EUN1;
                     break;
+
                 case "euw":
                     platform = Platform.EUW1;
                     break;
+
                 case "jp":
                     throw new RegionNotFoundException("This region does not exist in the API (yet).");
+
                 case "kr":
                     platform = Platform.KR;
                     break;
+
                 case "lan":
                     platform = Platform.LA1;
                     break;
+
                 case "las":
                     platform = Platform.LA2;
                     break;
+
                 case "na":
                     platform = Platform.NA1;
                     break;
+
                 case "oce":
                     platform = Platform.OC1;
                     break;
+
                 case "ru":
                     platform = Platform.RU;
                     break;
+
                 case "tr":
                     platform = Platform.TR1;
                     break;
+
                 default:
                     throw new RegionNotFoundException("This region does not exist (yet).");
             }
@@ -589,9 +644,14 @@ namespace SmellyDiscordBot.League
         private ChampionStatic GetChampion(Region region, string championName)
         {
             if ("tf".Equals(championName.ToLower()))
+            {
                 championName = "Twisted Fate";
+            }
             else if ("asol".Equals(championName.ToLower()))
+            {
                 championName = "Aurelion Sol";
+            }
+            
             var champions = staticApi.GetChampions(region, ChampionData.all).Champions.Values;
             foreach (var champ in champions)
             {
