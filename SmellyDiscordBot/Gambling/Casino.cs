@@ -1,11 +1,17 @@
 ﻿using Discord.Commands;
+using SmellyDiscordBot.Gambling;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace SmellyDiscordBot
 {
-    public static class Casino
+    public class Casino
     {
+        private List<Gambler> gamblers = new List<Gambler>();
+
         enum Outcomes
         {
             heart,
@@ -17,6 +23,135 @@ namespace SmellyDiscordBot
             zap,
             heartpulse,
             x
+        }
+
+        /// <summary>
+        /// Fetches the gamblers and their cash from a file.
+        /// </summary>
+        public void FetchGamblers()
+        {
+            StreamReader sr = null;
+            try
+            {
+                string filePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "gamblers.txt");
+                sr = new StreamReader(filePath);
+
+                while (!sr.EndOfStream)
+                {
+                    string line = sr.ReadLine();
+                    string name = line.Substring(0, line.IndexOf(' '));
+                    int cash = Int32.Parse(line.Substring(line.IndexOf(' '), line.Length));
+
+                    Gambler g = new Gambler();
+                    g.SetName(name);
+                    g.SetCash(cash);
+
+                    this.gamblers.Add(g);
+                }
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                if (sr != null)
+                {
+                    sr.Close();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns the cash for a specific gambler.
+        /// </summary>
+        /// <param name="name">The name of the gambler.</param>
+        /// <returns>The amount of cash of the gambler.
+        /// Returns -1 if no gambler was found.</returns>
+        public int GetCash(string name)
+        {
+            foreach (Gambler g in this.gamblers)
+            {
+                if (g.GetName() == name)
+                {
+                    return g.GetCash();
+                }
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        /// Writes all the gamblers and their cash to the file.
+        /// </summary>
+        public void WriteAllGamblers()
+        {
+            StreamWriter sw = null;
+            try
+            {
+                string filePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "gamblers.txt");
+                sw = new StreamWriter(filePath);
+
+                foreach (Gambler g in this.gamblers)
+                {
+                    sw.Write(g.GetName() + " " + g.GetCash() + "\n");
+                }
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                if (sw != null)
+                {
+                    sw.Close();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds a new gambler to the list.
+        /// </summary>
+        /// <param name="name"></param>
+        public bool AddNewGambler(string name)
+        {
+            foreach (Gambler g in this.gamblers)
+            {
+                if (g.GetName() == name)
+                {
+                    return false;
+                }
+            }
+
+            Gambler newGambler = new Gambler();
+            newGambler.SetName(name);
+            newGambler.SetCash(500);
+
+            gamblers.Add(newGambler);
+
+            StreamWriter sw = null;
+
+            try
+            {
+                string filePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "gamblers.txt");
+                sw = new StreamWriter(filePath);
+                sw.Write(newGambler.GetName() + " " + newGambler.GetCash() + "\n");
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+            finally
+            {
+                if (sw != null)
+                {
+                    sw.Close();
+                }
+            }
+
+            return true;
         }
 
         /// <summary>

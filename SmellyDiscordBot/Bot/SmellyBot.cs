@@ -14,6 +14,7 @@ namespace SmellyDiscordBot
         private DiscordClient client;
         private CommandService commands;
         private LeagueStats stats = null;
+        private Casino casino = null;
         #endregion
         private enum eventType
         {
@@ -421,9 +422,49 @@ namespace SmellyDiscordBot
             #endregion
             #endregion
             #region Gambling
+            commands.CreateCommand("checkcash").Do(async (e) =>
+            {
+                if (this.casino == null)
+                {
+                    this.casino = new Casino();
+                    this.casino.FetchGamblers();
+                }
+
+                int cash = this.casino.GetCash(e.User.Name);
+
+                if (cash != -1) {
+                    await e.Channel.SendMessage(String.Format("{0} has a total of {1} SmellyBucks.", e.User.Nickname, cash));
+                }
+                else
+                {
+                    await e.Channel.SendMessage(String.Format("You don't have an account at SmellyBank yet. Please register one with {0}startgambling.", Properties.Default.prefix));
+                }
+            });
+            commands.CreateCommand("startgambling").Do(async (e) =>
+            {
+                if (this.casino == null)
+                {
+                    this.casino = new Casino();
+                    this.casino.FetchGamblers();
+                }
+
+                if (this.casino.AddNewGambler(e.User.Name))
+                {
+                    await e.Channel.SendMessage("You have succesfully registered at SmellyBank and have received your starting 500 SmellyBucks.");
+                }
+                else
+                {
+                    await e.Channel.SendMessage(String.Format("You already have an account at SmellyBank. You can use {0}checkcash to see your cash.", Properties.Default.prefix));
+                }
+            });
             #region Slot Machine
             commands.CreateCommand("slots").Do(async (e) =>
             {
+                if (this.casino == null)
+                {
+                    this.casino = new Casino();
+                    this.casino.FetchGamblers();
+                }
                 await Casino.Slots(e);
             });
             #endregion
