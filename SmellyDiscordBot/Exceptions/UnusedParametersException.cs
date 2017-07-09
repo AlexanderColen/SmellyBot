@@ -2,6 +2,7 @@
 
 namespace SmellyDiscordBot
 {
+    [Serializable]
     class UnusedParametersException : Exception
     {
         public UnusedParametersException()

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SmellyDiscordBot
 {
-    public class SmellyBot
+    public sealed class SmellyBot : IDisposable
     {
         #region Fields
         private DiscordClient client;
@@ -724,5 +724,15 @@ namespace SmellyDiscordBot
             await channel.SendMessage(string.Format("A role named '{0}' has been deleted!", e.Role.Name));
         }
         #endregion
+
+        /// <summary>
+        /// Dispose method from IDisposable interface.
+        /// Closes and disposed instances.
+        /// </summary>
+        public void Dispose()
+        {
+            ((IDisposable) client).Dispose();
+            GC.SuppressFinalize(this);
+        }
     }
 }

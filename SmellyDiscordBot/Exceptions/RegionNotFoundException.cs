@@ -2,6 +2,7 @@
 
 namespace SmellyDiscordBot.Exceptions
 {
+    [Serializable]
     class RegionNotFoundException : Exception
     {
         public RegionNotFoundException()

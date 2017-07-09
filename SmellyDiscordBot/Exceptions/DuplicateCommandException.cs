@@ -2,6 +2,7 @@
 
 namespace SmellyDiscordBot
 {
+    [Serializable]
     class DuplicateCommandException : Exception
     {
         public DuplicateCommandException()

@@ -2,6 +2,7 @@
 
 namespace SmellyDiscordBot
 {
+    [Serializable]
     class UnknownEventException : Exception
     {
         public UnknownEventException()

@@ -2,6 +2,7 @@
 
 namespace SmellyDiscordBot.Exceptions
 {
+    [Serializable]
     class SummonerNotFoundException : Exception
     {
         public SummonerNotFoundException()
