@@ -1,4 +1,5 @@
 ﻿using Discord.Commands;
+using SmellyDiscordBot.Bot;
 using SmellyDiscordBot.Gambling;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace SmellyDiscordBot
 {
     public class Casino
     {
-        private List<Gambler> gamblers = new List<Gambler>();
+        private List<Gambler> gamblers;
 
         enum Outcomes
         {
@@ -36,11 +37,14 @@ namespace SmellyDiscordBot
                 string filePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "gamblers.txt");
                 sr = new StreamReader(filePath);
 
+                this.gamblers = new List<Gambler>();
+
                 while (!sr.EndOfStream)
                 {
                     string line = sr.ReadLine();
                     string name = line.Substring(0, line.IndexOf(' '));
-                    int cash = Int32.Parse(line.Substring(line.IndexOf(' '), line.Length));
+                    line = line.Remove(0, line.IndexOf(' ') + 1);
+                    int cash = int.Parse(line);
 
                     Gambler g = new Gambler();
                     g.SetName(name);
@@ -68,13 +72,16 @@ namespace SmellyDiscordBot
         /// <param name="name">The name of the gambler.</param>
         /// <returns>The amount of cash of the gambler.
         /// Returns -1 if no gambler was found.</returns>
-        public int GetCash(string name)
+        public Int64 GetCash(string name)
         {
-            foreach (Gambler g in this.gamblers)
+            if (this.gamblers != null)
             {
-                if (g.GetName() == name)
+                foreach (Gambler g in this.gamblers)
                 {
-                    return g.GetCash();
+                    if (g.GetName() == name)
+                    {
+                        return g.GetCash();
+                    }
                 }
             }
 
@@ -94,7 +101,7 @@ namespace SmellyDiscordBot
 
                 foreach (Gambler g in this.gamblers)
                 {
-                    sw.Write(g.GetName() + " " + g.GetCash() + "\n");
+                    sw.WriteLine(g.GetName() + " " + g.GetCash());
                 }
             }
             catch (IOException ex)
@@ -130,27 +137,6 @@ namespace SmellyDiscordBot
 
             gamblers.Add(newGambler);
 
-            StreamWriter sw = null;
-
-            try
-            {
-                string filePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "gamblers.txt");
-                sw = new StreamWriter(filePath);
-                sw.Write(newGambler.GetName() + " " + newGambler.GetCash() + "\n");
-            }
-            catch (IOException ex)
-            {
-                Console.WriteLine(ex.Message);
-                return false;
-            }
-            finally
-            {
-                if (sw != null)
-                {
-                    sw.Close();
-                }
-            }
-
             return true;
         }
 
@@ -172,32 +158,74 @@ namespace SmellyDiscordBot
         /// <returns>A message in the channel that specifies which user tried to spin, 
         /// another one with the outcome of the spin, 
         /// and a final message that says something about the outcome.</returns>
-        public static async Task Slots(CommandEventArgs e)
+        public async Task Slots(CommandEventArgs e)
         {
-            string user = Utils.FetchUserName(e);
-            await e.Channel.SendMessage(string.Format("*{0}* tries their luck at the slot machine...", user));
-
             try
             {
+                var parameter = Utils.ReturnInputParameterStringArray(e)[0];
+
+                Int64 bet = Int64.Parse(parameter);
+                Int64 payout = 0;
+
+                Gambler gambler = null;
+
+                //Fetch the gambler.
+                foreach (Gambler g in this.gamblers)
+                {
+                    if (g.GetName() == e.User.Name)
+                    {
+                        gambler = g;
+                        break;
+                    }
+                }
+                //Gambler doesn't exist, thus no account to gamble with.
+                if (gambler == null)
+                {
+                    await e.Channel.SendMessage(String.Format("You don't have an account at SmellyBank yet. Please register one with {0}startgambling.", Properties.Default.prefix));
+                    return;
+                }
+                //Gambler's balance not high enough, thus no money to gamble with.
+                if (gambler.GetCash() - bet < 0 || bet < 0)
+                {
+                    await e.Channel.SendMessage(String.Format("You don't have enough cash to bet this much. The most you can bet is {0}.", gambler.GetCash()));
+                    return;
+                }
+
+                string user = Utils.FetchUserName(e);
+                await e.Channel.SendMessage(String.Format("*{0}* tries their luck at the slot machine...", user));
+
                 Random rand = new Random(new Random().Next(10000));
                 var enum1 = GetRandomOutcome(rand);
                 var enum2 = GetRandomOutcome(rand);
                 var enum3 = GetRandomOutcome(rand);
-                await e.Channel.SendMessage(string.Format(":{0}: - :{1}: - :{2}:", enum1, enum2, enum3));
-
-                //TODO Do something with the outcome. (Possibly when betting is added?)
+                await e.Channel.SendMessage(String.Format(":{0}: - :{1}: - :{2}:", enum1, enum2, enum3));
+                
                 if (enum1.Equals(enum2) && enum2.Equals(enum3))
                 {
-                    await e.Channel.SendMessage(string.Format("*{0}* has hit the jackpot!", user));
+                    payout = bet * 10;
+                    await e.Channel.SendMessage(String.Format("*{0}* has hit the jackpot!", user));
+                    await e.Channel.SendMessage(String.Format("Payout: {0} x 10 = *{1}*", bet, payout));
                 }
                 else if (enum1.Equals(enum2) || enum2.Equals(enum3) || enum1.Equals(enum3))
                 {
-                    await e.Channel.SendMessage("So close, yet so far.");
+                    payout = bet * 3;
+                    await e.Channel.SendMessage(String.Format("Payout: {0} x 3 = *{1}*", bet, payout));
                 }
                 else
                 {
-                    await e.Channel.SendMessage(string.Format("Better luck next time, *{0}*...", user));
+                    await e.Channel.SendMessage(String.Format("Better luck next time, *{0}*...", user));
                 }
+
+                gambler.RemoveCash(bet);
+                gambler.AddCash(payout);
+            }
+            catch (FormatException)
+            {
+                await e.Channel.SendMessage("Please bet an amount of cash after the command.");
+            }
+            catch (OverflowException)
+            {
+                await e.Channel.SendMessage(String.Format("You can't bet that much. The most you can bet is {0}.", int.MaxValue));
             }
             catch (Exception ex)
             {
@@ -228,7 +256,7 @@ namespace SmellyDiscordBot
                 Random rand = new Random();
 
                 var outcome = rand.Next(minimum, maximum);
-                await e.Channel.SendMessage(string.Format("*{0}* rolled a **{1}**.", Utils.FetchUserName(e), outcome));
+                await e.Channel.SendMessage(String.Format("*{0}* rolled a **{1}**.", Utils.FetchUserName(e), outcome));
             }
             catch (Exception ex) when (ex is UnusedParametersException || ex is ArgumentException || ex is FormatException)
             {

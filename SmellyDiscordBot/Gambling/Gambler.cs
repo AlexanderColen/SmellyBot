@@ -10,7 +10,7 @@ namespace SmellyDiscordBot.Gambling
     {
         #region Fields
         private string name;
-        private int cash;
+        private Int64 cash;
         #endregion
         #region Properties
         public string GetName()
@@ -21,11 +21,11 @@ namespace SmellyDiscordBot.Gambling
         {
             this.name = name;
         }
-        public int GetCash()
+        public Int64 GetCash()
         {
             return this.cash;
         }
-        public void SetCash(int cash)
+        public void SetCash(Int64 cash)
         {
             this.cash = cash;
         }
@@ -35,9 +35,18 @@ namespace SmellyDiscordBot.Gambling
         /// Add cash to the gambler.
         /// </summary>
         /// <param name="amount">The amount of cash to be added.</param>
-        public void AddCash(int amount)
+        public void AddCash(Int64 amount)
         {
             this.cash += amount;
+        }
+
+        /// <summary>
+        /// Removes cash from the gambler.
+        /// </summary>
+        /// <param name="amount">The amount of cash to be removed.</param>
+        public void RemoveCash(Int64 amount)
+        {
+            this.cash -= amount;
         }
     }
 }

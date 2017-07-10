@@ -263,8 +263,13 @@ namespace SmellyDiscordBot
                                 + String.Format("{0}roll <min>-<max>", Properties.Default.prefix).PadRight(25)
                                                 + "Rolls a random number between the given minimum & maximum.".PadRight(60)
                                                 + String.Format("Example: {0}roll 1-100", Properties.Default.prefix) + "\n"
-                                + String.Format("{0}slots", Properties.Default.prefix).PadRight(25)
-                                                + "Generates a play on a slotmachine.".PadRight(60) + "\n"
+                                + String.Format("{0}slots <betAmount>", Properties.Default.prefix).PadRight(25)
+                                                + "Generates a play on a slotmachine.".PadRight(60)
+                                                + String.Format("Example: {0}slots 25", Properties.Default.prefix) + "\n"
+                                + String.Format("{0}startgambling", Properties.Default.prefix).PadRight(25)
+                                                + "Registers an account at SmellyBank to start gambling.".PadRight(60) + "\n"
+                                + String.Format("{0}checkcash", Properties.Default.prefix).PadRight(25)
+                                                + "Checks the balance of your account at SmellyBank.".PadRight(60) + "\n"
                                 + "```";
                 await e.User.SendMessage(output);
             });
@@ -401,8 +406,11 @@ namespace SmellyDiscordBot
             {
                 if (e.User.ServerPermissions.Administrator)
                 {
+                    this.casino.WriteAllGamblers();
                     await e.Channel.SendMessage(string.Format("{0} signing out.", client.CurrentUser.Name));
+                    System.Threading.Thread.Sleep(500);
                     await client.Disconnect();
+                    Dispose();
                 }
             });
             #endregion
@@ -430,7 +438,7 @@ namespace SmellyDiscordBot
                     this.casino.FetchGamblers();
                 }
 
-                int cash = this.casino.GetCash(e.User.Name);
+                Int64 cash = this.casino.GetCash(e.User.Name);
 
                 if (cash != -1) {
                     await e.Channel.SendMessage(String.Format("{0} has a total of {1} SmellyBucks.", e.User.Nickname, cash));
@@ -458,14 +466,14 @@ namespace SmellyDiscordBot
                 }
             });
             #region Slot Machine
-            commands.CreateCommand("slots").Do(async (e) =>
+            commands.CreateCommand("slots").Parameter("message", ParameterType.Required).Do(async (e) =>
             {
                 if (this.casino == null)
                 {
                     this.casino = new Casino();
                     this.casino.FetchGamblers();
                 }
-                await Casino.Slots(e);
+                await this.casino.Slots(e);
             });
             #endregion
             #region Random Roll
