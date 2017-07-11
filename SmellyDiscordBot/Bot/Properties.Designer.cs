@@ -112,14 +112,5 @@ namespace SmellyDiscordBot.Bot {
                 return ((string)(this["riotAPIkey"]));
             }
         }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("unknown")]
-        public string habiticaAPIkey {
-            get {
-                return ((string)(this["habiticaAPIkey"]));
-            }
-        }
     }
 }

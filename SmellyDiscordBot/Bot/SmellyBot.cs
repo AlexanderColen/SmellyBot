@@ -1,9 +1,12 @@
 ﻿using Discord;
 using Discord.Commands;
+using HabitRPG.Client;
 using SmellyDiscordBot.Bot;
 using SmellyDiscordBot.League;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace SmellyDiscordBot
