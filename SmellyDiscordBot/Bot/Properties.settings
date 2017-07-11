@@ -26,5 +26,8 @@
     <Setting Name="riotAPIkey" Type="System.String" Scope="Application">
       <Value Profile="(Default)">unknown</Value>
     </Setting>
+    <Setting Name="habiticaAPIkey" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">unknown</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
