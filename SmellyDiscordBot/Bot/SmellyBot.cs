@@ -1,12 +1,10 @@
 ﻿using Discord;
 using Discord.Commands;
-using HabitRPG.Client;
 using SmellyDiscordBot.Bot;
+using SmellyDiscordBot.Exceptions;
 using SmellyDiscordBot.League;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace SmellyDiscordBot
@@ -500,74 +498,138 @@ namespace SmellyDiscordBot
             #region League of Legends
             commands.CreateCommand("level").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
-                if (stats == null)
+                try
                 {
-                    stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    if (stats == null)
+                    {
+                        stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    }
+
+                    await stats.GetSummonerLevel(e);
                 }
-                await stats.GetSummonerLevel(e);
+                catch (InvalidAPITokenException ex)
+                {
+                    await e.Channel.SendMessage(ex.Message);
+                }
             });
 
             commands.CreateCommand("rank").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
-                if (stats == null)
+                try
                 {
-                    stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    if (stats == null)
+                    {
+                        stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    }
+
+                    await stats.GetSummonerRank(e);
                 }
-                await stats.GetSummonerRank(e);
+                catch (InvalidAPITokenException ex)
+                {
+                    await e.Channel.SendMessage(ex.Message);
+                }
             });
 
             commands.CreateCommand("currentgame").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
-                if (stats == null)
+                try
                 {
-                    stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    if (stats == null)
+                    {
+                        stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    }
+
+                    await stats.GetCurrentGameStats(e);
                 }
-                await stats.GetCurrentGameStats(e);
+                catch (InvalidAPITokenException ex)
+                {
+                    await e.Channel.SendMessage(ex.Message);
+                }
             });
 
             commands.CreateCommand("status").Parameter("message", ParameterType.Required).Do(async (e) =>
             {
-                if (stats == null)
+                try
                 {
-                    stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    if (stats == null)
+                    {
+                        stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    }
+
+                    await stats.GetServerStatus(e);
                 }
-                await stats.GetLeagueStatus(e);
+                catch (InvalidAPITokenException ex)
+                {
+                    await e.Channel.SendMessage(ex.Message);
+                }
             });
 
             commands.CreateCommand("stats").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
-                if (stats == null)
+
+                try
                 {
-                    stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    if (stats == null)
+                    {
+                        stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    }
+                    await stats.GetChampionStats(e);
                 }
-                await stats.GetChampionStats(e);
+                catch (InvalidAPITokenException ex)
+                {
+                    await e.Channel.SendMessage(ex.Message);
+                }
             });
 
             commands.CreateCommand("counter").Parameter("message", ParameterType.Required).Do(async (e) =>
             {
-                if (stats == null)
+                try
                 {
-                    stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    if (stats == null)
+                    {
+                        stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    }
+
+                    await stats.GetChampionCounter(e);
                 }
-                await stats.GetChampionCounter(e);
+                catch (InvalidAPITokenException ex)
+                {
+                    await e.Channel.SendMessage(ex.Message);
+                }
             });
 
             commands.CreateCommand("howto").Parameter("message", ParameterType.Required).Do(async (e) =>
             {
-                if (stats == null)
+                try
                 {
-                    stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    if (stats == null)
+                    {
+                        stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    }
+
+                    await stats.GetChampionTips(e);
                 }
-                await stats.GetChampionTips(e);
+                catch (InvalidAPITokenException ex)
+                {
+                    await e.Channel.SendMessage(ex.Message);
+                }
             });
 
             commands.CreateCommand("lore").Parameter("message", ParameterType.Required).Do(async (e) =>
             {
-                if (stats == null)
+                try
                 {
-                    stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    if (stats == null)
+                    {
+                        stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    }
+
+                    await stats.GetChampionLore(e);
                 }
-                await stats.GetChampionLore(e);
+                catch (InvalidAPITokenException ex)
+                {
+                    await e.Channel.SendMessage(ex.Message);
+                }
             });
             #endregion
         }

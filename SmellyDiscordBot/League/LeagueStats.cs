@@ -22,12 +22,19 @@ namespace SmellyDiscordBot.League
         /// <param name="apiKey">A developer key from https://developer.riotgames.com/ </param>
         public LeagueStats(string apiKey)
         {
-            if (!"unknown".Equals(apiKey))
-            {
-                api = RiotApi.GetInstance(apiKey);
-                staticApi = StaticRiotApi.GetInstance(apiKey);
-            }
+            api = RiotApi.GetInstance(apiKey);
+            staticApi = StaticRiotApi.GetInstance(apiKey);
             statusApi = StatusRiotApi.GetInstance();
+            
+            try
+            {
+                this.api.GetChampion(Region.br, 1);
+            }
+            catch (RiotSharpException ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw new InvalidAPITokenException("Please provide a valid Riot API token for SmellyBot to use League of Legends commands.");
+            }
         }
 
         /// <summary>
@@ -240,7 +247,7 @@ namespace SmellyDiscordBot.League
         /// </summary>
         /// <param name="e">The command event which was executed.</param>
         /// <returns>A message in the channel with information regarding the server status for the requested region.</returns>
-        public async Task GetLeagueStatus(CommandEventArgs e)
+        public async Task GetServerStatus(CommandEventArgs e)
         {
             var input = Utils.ReturnInputParameterStringArray(e);
             string regionString = input[0];
@@ -254,7 +261,7 @@ namespace SmellyDiscordBot.League
                 shardStatuses = statusApi.GetShardStatus(region);
                 foreach (var service in shardStatuses.Services)
                 {
-                    output += String.Format("Status of {0}: {1}. ({2} incidents happened)", service.Name, service.Status, service.Incidents.Count) + "\n";
+                    output += String.Format("Status of {0}: {1}. ({2} incident(s) happened)", service.Name, service.Status, service.Incidents.Count) + "\n";
                 }
                 output += "```";
                 await e.Channel.SendMessage(output);
@@ -630,7 +637,7 @@ namespace SmellyDiscordBot.League
             }
             catch (RiotSharpException)
             {
-                throw new SummonerNotFoundException("This Summoner does not exist in this region.");
+                throw new SummonerNotFoundException("This Summoner could not be found in this region.");
             }
             return summoner;
         }
