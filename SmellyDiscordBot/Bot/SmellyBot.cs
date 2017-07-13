@@ -4,6 +4,7 @@ using SmellyDiscordBot.Bot;
 using SmellyDiscordBot.Exceptions;
 using SmellyDiscordBot.League;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -240,6 +241,10 @@ namespace SmellyDiscordBot
                                 + String.Format("{0}setgame <status>", Properties.Default.prefix).PadRight(35)
                                                 + "Sets the status of this SmellyBot instance. Displays as: 'Playing <status>'".PadRight(85)
                                                 + String.Format("Example: {0}setgame something", Properties.Default.prefix) + "\n"
+                                + String.Format("{0}clear", Properties.Default.prefix).PadRight(35)
+                                                + "Clears all of SmellyBot's messages in this channel.".PadRight(85) + "\n"
+                                + String.Format("{0}clear", Properties.Default.prefix).PadRight(35)
+                                                + "Clears every message in this channel.".PadRight(85) + "\n"
                                 + String.Format("{0}toggleall", Properties.Default.prefix).PadRight(35)
                                                 + "Toggles all events showing in chat. Turns them on if currently off and the opposite.".PadRight(85)
                                                 + String.Format("Example: {0}toggleall", Properties.Default.prefix) + "\n"
@@ -392,7 +397,7 @@ namespace SmellyDiscordBot
                 }
             });
             #endregion
-            #region Save changes to properties.
+            #region Save Changes To Properties.
             commands.CreateCommand("save").Do(async (e) =>
             {
                 if (e.User.ServerPermissions.Administrator)
@@ -426,6 +431,39 @@ namespace SmellyDiscordBot
                         game += s.PadRight(1);
                     }
                     client.SetGame(game);
+                }
+            });
+            #endregion
+            #region Delete Channel Messages
+            commands.CreateCommand("clear").Do(async(e) => 
+            {
+                if (e.User.ServerPermissions.Administrator)
+                {
+                    List<Message> toRemoveMessages = new List<Message>();
+                
+                    foreach (Message m in await e.Channel.DownloadMessages())
+                    {
+                        //If SmellyBot sent the message, it will be added to the list. 
+                        if (m.IsAuthor)
+                        {
+                            toRemoveMessages.Add(m);
+                            continue;
+                        }
+                        //Also removes the messages that ask for clears.
+                        else if (m.Text.Equals(String.Format("{0}clear", Properties.Default.prefix)))
+                        {
+                            toRemoveMessages.Add(m);
+                        }
+                    }
+
+                    await e.Channel.DeleteMessages(toRemoveMessages.ToArray());
+                }
+            });
+            commands.CreateCommand("clearall").Do(async (e) =>
+            {
+                if (e.User.ServerPermissions.Administrator)
+                {
+                    await e.Channel.DeleteMessages(await e.Channel.DownloadMessages());
                 }
             });
             #endregion
@@ -800,7 +838,7 @@ namespace SmellyDiscordBot
 
         /// <summary>
         /// Dispose method from IDisposable interface.
-        /// Closes and disposed instances.
+        /// Closes and/or disposes instances.
         /// </summary>
         public void Dispose()
         {
