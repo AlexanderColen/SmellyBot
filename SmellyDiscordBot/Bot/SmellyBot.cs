@@ -287,10 +287,10 @@ namespace SmellyDiscordBot
                                 + "Command".PadRight(35) + "Description".PadRight(75) + "Example" + "\n" + "\n"
                                 + String.Format("{0}level <region> <summoner>", Properties.Default.prefix).PadRight(35)
                                                 + "Shows the level of the summoner in the region.".PadRight(75)
-                                                + String.Format("Example: {0}level na xxRivenMaster98xx", Properties.Default.prefix) + "\n"
+                                                + String.Format("Example: {0}level euw ChallengerJanna", Properties.Default.prefix) + "\n"
                                 + String.Format("{0}rank <region> <summoner>", Properties.Default.prefix).PadRight(35)
                                                 + "Shows the rank(s) of the summoner in the region.".PadRight(75)
-                                                + String.Format("Example: {0}rank na xxRivenMaster98xx", Properties.Default.prefix) + "\n"
+                                                + String.Format("Example: {0}rank kr hide on bush", Properties.Default.prefix) + "\n"
                                 + String.Format("{0}currentgame <region> <summoner>", Properties.Default.prefix).PadRight(35)
                                                 + "Displays the current game that the summoner in the region is playing.".PadRight(75)
                                                 + String.Format("Example: {0}currentgame na xxRivenMaster98xx", Properties.Default.prefix) + "\n"
@@ -341,6 +341,10 @@ namespace SmellyDiscordBot
                     await e.Channel.SendMessage(ToggleEvents(eventType.channel));
                     await e.Channel.SendMessage(ToggleEvents(eventType.role));
                 }
+                else
+                {
+                    await e.Channel.SendMessage("You do not have sufficient permissions to use this command.");
+                }
             });
 
             commands.CreateCommand("toggleuser").Do(async (e) =>
@@ -349,6 +353,10 @@ namespace SmellyDiscordBot
                 {
                     Properties.Default.userEvents = !Properties.Default.userEvents;
                     await e.Channel.SendMessage(ToggleEvents(eventType.user));
+                }
+                else
+                {
+                    await e.Channel.SendMessage("You do not have sufficient permissions to use this command.");
                 }
             });
 
@@ -359,6 +367,10 @@ namespace SmellyDiscordBot
                     Properties.Default.channelEvents = !Properties.Default.channelEvents;
                     await e.Channel.SendMessage(ToggleEvents(eventType.channel));
                 }
+                else
+                {
+                    await e.Channel.SendMessage("You do not have sufficient permissions to use this command.");
+                }
             });
 
             commands.CreateCommand("togglerole").Do(async (e) =>
@@ -368,24 +380,46 @@ namespace SmellyDiscordBot
                     Properties.Default.roleEvents = !Properties.Default.roleEvents;
                     await e.Channel.SendMessage(ToggleEvents(eventType.role));
                 }
+                else
+                {
+                    await e.Channel.SendMessage("You do not have sufficient permissions to use this command.");
+                }
             });
 
             commands.CreateCommand("toggleuser").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
                 if (e.User.ServerPermissions.Administrator)
+                {
                     await ToggleSpecificEvent(e);
+                }
+                else
+                {
+                    await e.Channel.SendMessage("You do not have sufficient permissions to use this command.");
+                }
             });
 
             commands.CreateCommand("togglechannel").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
                 if (e.User.ServerPermissions.Administrator)
+                {
                     await ToggleSpecificEvent(e);
+                }
+                else
+                {
+                    await e.Channel.SendMessage("You do not have sufficient permissions to use this command.");
+                }
             });
 
             commands.CreateCommand("togglerole").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
                 if (e.User.ServerPermissions.Administrator)
+                {
                     await ToggleSpecificEvent(e);
+                }
+                else
+                {
+                    await e.Channel.SendMessage("You do not have sufficient permissions to use this command.");
+                }
             });
             #endregion
             #region Create Basic Command
@@ -394,6 +428,10 @@ namespace SmellyDiscordBot
                 if (e.User.ServerPermissions.Administrator)
                 {
                     await AddCommand(e);
+                }
+                else
+                {
+                    await e.Channel.SendMessage("You do not have sufficient permissions to use this command.");
                 }
             });
             #endregion
@@ -404,6 +442,10 @@ namespace SmellyDiscordBot
                 {
                     Properties.Default.Save();
                     await e.Channel.SendMessage("The changes to the settings file were saved!");
+                }
+                else
+                {
+                    await e.Channel.SendMessage("You do not have sufficient permissions to use this command.");
                 }
             });
             #endregion
@@ -418,10 +460,14 @@ namespace SmellyDiscordBot
                     await client.Disconnect();
                     Dispose();
                 }
+                else
+                {
+                    await e.Channel.SendMessage("You do not have sufficient permissions to use this command.");
+                }
             });
             #endregion
             #region Set SmellyBot's Game
-            commands.CreateCommand("setgame").Parameter("message", ParameterType.Multiple).Do((e) =>
+            commands.CreateCommand("setgame").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
                 if (e.User.ServerPermissions.Administrator)
                 {
@@ -431,6 +477,10 @@ namespace SmellyDiscordBot
                         game += s.PadRight(1);
                     }
                     client.SetGame(game);
+                }
+                else
+                {
+                    await e.Channel.SendMessage("You do not have sufficient permissions to use this command.");
                 }
             });
             #endregion
@@ -458,12 +508,20 @@ namespace SmellyDiscordBot
 
                     await e.Channel.DeleteMessages(toRemoveMessages.ToArray());
                 }
+                else
+                {
+                    await e.Channel.SendMessage("You do not have sufficient permissions to use this command.");
+                }
             });
             commands.CreateCommand("clearall").Do(async (e) =>
             {
                 if (e.User.ServerPermissions.Administrator)
                 {
                     await e.Channel.DeleteMessages(await e.Channel.DownloadMessages());
+                }
+                else
+                {
+                    await e.Channel.SendMessage("You do not have sufficient permissions to use this command.");
                 }
             });
             #endregion
