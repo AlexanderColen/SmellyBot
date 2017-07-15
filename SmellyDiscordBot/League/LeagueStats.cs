@@ -25,7 +25,7 @@ namespace SmellyDiscordBot.League
             api = RiotApi.GetInstance(apiKey);
             staticApi = StaticRiotApi.GetInstance(apiKey);
             statusApi = StatusRiotApi.GetInstance();
-            
+
             try
             {
                 this.api.GetChampion(Region.br, 1);
@@ -202,8 +202,8 @@ namespace SmellyDiscordBot.League
                     }
                 }
 
-                int minutes = (Int32) currentGame.GameLength / 60;
-                int seconds = (Int32) currentGame.GameLength % 60;
+                int minutes = (Int32)currentGame.GameLength / 60;
+                int seconds = (Int32)currentGame.GameLength % 60;
 
                 //Information to display.
                 string output = String.Format("*{0}* is currently in a **{1}** game on {2}. ({3})", summoner.Name, currentGame.GameMode, currentGame.MapType, currentGame.GameQueueType) + "\n"
@@ -215,7 +215,7 @@ namespace SmellyDiscordBot.League
                                                + "```"
                                                + "".PadLeft(13) + "Blue Team".PadRight(22) + " - " + "".PadLeft(13) + "Red Team".PadRight(22) + "\n"
                                                + "".PadRight(75, '~') + "\n";
-                
+
                 for (int i = 0; i < currentGame.Participants.Count / 2; i++)
                 {
                     output += summoners[i].PadRight(35);
@@ -223,7 +223,7 @@ namespace SmellyDiscordBot.League
                     output += summoners[i + 5].PadRight(35);
                     output += " \n";
                 }
-                                                
+
                 output += "```";
                 await e.Channel.SendMessage(output);
             }
@@ -332,11 +332,11 @@ namespace SmellyDiscordBot.League
                 output += "\n **Base Stats**";
                 output += "```" + "\n";
                 //Health
-                output += String.Format("Health: {0} (+{1} Health/5s)", 
-                            champ.Stats.Hp.ToString(System.Globalization.CultureInfo.InvariantCulture), 
+                output += String.Format("Health: {0} (+{1} Health/5s)",
+                            champ.Stats.Hp.ToString(System.Globalization.CultureInfo.InvariantCulture),
                             champ.Stats.HpRegen.ToString(System.Globalization.CultureInfo.InvariantCulture)).PadRight(40)
-                        + String.Format(" - Growth/Level: {0}  (+{1} Health/5s)", 
-                            champ.Stats.HpPerLevel.ToString(System.Globalization.CultureInfo.InvariantCulture), 
+                        + String.Format(" - Growth/Level: {0}  (+{1} Health/5s)",
+                            champ.Stats.HpPerLevel.ToString(System.Globalization.CultureInfo.InvariantCulture),
                             champ.Stats.HpRegenPerLevel.ToString(System.Globalization.CultureInfo.InvariantCulture)) + "\n";
 
                 //Resource
@@ -344,9 +344,9 @@ namespace SmellyDiscordBot.League
                             champ.Partype,
                             champ.Stats.Mp.ToString(System.Globalization.CultureInfo.InvariantCulture),
                             champ.Stats.MpRegen.ToString(System.Globalization.CultureInfo.InvariantCulture)).PadRight(40)
-                        + String.Format(" - Growth/Level: {0}  (+{1} {2}/5s)", 
+                        + String.Format(" - Growth/Level: {0}  (+{1} {2}/5s)",
                             champ.Stats.MpPerLevel.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                            champ.Stats.MpRegenPerLevel.ToString(System.Globalization.CultureInfo.InvariantCulture) ,
+                            champ.Stats.MpRegenPerLevel.ToString(System.Globalization.CultureInfo.InvariantCulture),
                             champ.Partype) + "\n";
                 output += "\n";
 
@@ -478,12 +478,13 @@ namespace SmellyDiscordBot.League
                     await e.Channel.SendMessage(output.Substring(2000, 4000));
                     await e.Channel.SendMessage(output.Substring(4000));
                 }
-                else if(output.Length > 2000)
+                else if (output.Length > 2000)
                 {
                     await e.Channel.SendMessage(output.Substring(0, 2000));
                     await e.Channel.SendMessage(output.Substring(2000));
                 }
-                else {
+                else
+                {
                     await e.Channel.SendMessage(output);
                 }
             }
@@ -498,6 +499,104 @@ namespace SmellyDiscordBot.League
             catch (NullReferenceException)
             {
                 await e.Channel.SendMessage("Champion not found.");
+            }
+        }
+
+        /// <summary>
+        /// Gets information from ranked games on a certain champion for a summoner.
+        /// </summary>
+        /// <param name="e">The command event which was executed.</param>
+        /// <returns>A message in the channel with stats regarding the requested summoner in the region on the specified champion.</returns>
+        public async Task GetRankedChampStats(CommandEventArgs e)
+        {
+            var input = Utils.ReturnInputParameterStringArray(e);
+            string regionString = input[0];
+            string championName = input[1];
+            string summonerName = "";
+
+            if (input.Length == 3)
+            {
+                summonerName = input[2];
+            }
+            else
+            {
+                summonerName = input[2];
+                for (int i = 3; i < input.Length; i++)
+                {
+                    summonerName = String.Format("{0} {1}", summonerName, input[i]);
+                }
+            }
+
+            Summoner summoner = null;
+
+            try
+            {
+                Region region = GetRegion(regionString);
+                ChampionStatic champ = GetChampion(region, championName);
+
+                if (champ == null)
+                {
+                    throw new ChampionNotFoundException("Champion not found.");
+                }
+
+                summoner = GetSummoner(regionString, summonerName);
+
+                string output = String.Format("Ranked statistics for **{0}** on **{1}** \n ```", summoner.Name, champ.Name); 
+
+                List<RiotSharp.StatsEndpoint.ChampionStats> champStats = await api.GetStatsRankedAsync(region, summoner.Id);
+                
+                foreach (RiotSharp.StatsEndpoint.ChampionStats stat in champStats)
+                {
+                    if (stat.ChampionId == champ.Id)
+                    {
+                        decimal avgKills = (decimal) stat.Stats.TotalChampionKills / stat.Stats.TotalSessionsPlayed;
+                        decimal avgDeaths = (decimal) stat.Stats.TotalDeathsPerSession / stat.Stats.TotalSessionsPlayed;
+                        decimal avgAssists = (decimal) stat.Stats.TotalAssists / stat.Stats.TotalSessionsPlayed;
+                        decimal avgWinrate = (decimal) stat.Stats.TotalSessionsWon / stat.Stats.TotalSessionsPlayed * 100;
+
+                        int avgDmgDealt = stat.Stats.TotalDamageDealt / stat.Stats.TotalSessionsPlayed;
+                        int avgDmgTaken = stat.Stats.TotalDamageTaken / stat.Stats.TotalSessionsPlayed;
+                        int avgPhysDmg = stat.Stats.TotalPhysicalDamageDealt / stat.Stats.TotalSessionsPlayed;
+                        int avgMagicDmg = stat.Stats.TotalMagicDamageDealt / stat.Stats.TotalSessionsPlayed;
+                        int avgMinionKills = stat.Stats.TotalMinionKills / stat.Stats.TotalSessionsPlayed;
+                        int avgGoldGained = stat.Stats.TotalGoldEarned / stat.Stats.TotalSessionsPlayed;
+
+                        output += "Kills - Deaths - Assists" + "\n"
+                                + String.Format("{0} -  {1} -  {2} \n", decimal.Round(avgKills, 2).ToString(System.Globalization.CultureInfo.InvariantCulture).PadRight(5),
+                                                                        decimal.Round(avgDeaths, 2).ToString(System.Globalization.CultureInfo.InvariantCulture).PadRight(5),
+                                                                        decimal.Round(avgAssists, 2).ToString(System.Globalization.CultureInfo.InvariantCulture))
+                                + String.Format("Creep Score: {0} - Gold: {1} \n", avgMinionKills, avgGoldGained)
+                                + "\n" + "Multikills" + "\n"
+                                + String.Format("{0} Double Kills. \n", stat.Stats.TotalDoubleKills)
+                                + String.Format("{0} Triple Kills. \n", stat.Stats.TotalTripleKills)
+                                + String.Format("{0} Quadra Kills. \n", stat.Stats.TotalQuadraKills)
+                                + String.Format("{0} Penta Kills. \n", stat.Stats.TotalPentaKills)
+                                + "\n"
+                                + String.Format("{0} Games Played - {1} Wins - {2} Losses ({3}% Winrate.) \n", stat.Stats.TotalSessionsPlayed, stat.Stats.TotalSessionsWon, stat.Stats.TotalSessionsLost, decimal.Round(avgWinrate, 2).ToString(System.Globalization.CultureInfo.InvariantCulture))
+                                + "\n" + "Average Damage" + "\n"
+                                + String.Format("Dealt Per Game: {0} - Taken Per Game: {1} \n", avgDmgDealt, avgDmgTaken)
+                                + String.Format("Physical Damage: {0} - Magic Damage: {1} \n", avgPhysDmg, avgMagicDmg)
+                                + "\n" + ""
+                                + String.Format("Total Turrets kills: {0} - Minion Slaughtered: {1} - Total Gold Earned: {2}", stat.Stats.TotalTurretsKilled, stat.Stats.TotalMinionKills, stat.Stats.TotalGoldEarned);
+                        break;
+                    }
+                }
+                output += "```";
+                
+                await e.Channel.SendMessage(output);
+            }
+            catch (IndexOutOfRangeException)
+            {
+                await Utils.InproperCommandUsageMessage(e, "rankedstats", "rankedstats <REGION> <CHAMPION> <SUMMONER>");
+            }
+            catch (RiotSharpException ex)
+            {
+                Console.WriteLine(ex.Message);
+                await e.Channel.SendMessage(String.Format("{0} hasn't played any ranked this season.", summoner.Name));
+            }
+            catch (Exception ex) when (ex is SummonerNotFoundException || ex is RegionNotFoundException || ex is ChampionNotFoundException)
+            {
+                await e.Channel.SendMessage(ex.Message);
             }
         }
 
@@ -658,7 +757,7 @@ namespace SmellyDiscordBot.League
             {
                 championName = "Aurelion Sol";
             }
-            
+
             var champions = staticApi.GetChampions(region, ChampionData.all).Champions.Values;
             foreach (var champ in champions)
             {
