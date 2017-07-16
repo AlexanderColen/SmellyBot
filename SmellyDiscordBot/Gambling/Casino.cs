@@ -192,32 +192,35 @@ namespace SmellyDiscordBot
                 }
 
                 string user = Utils.FetchUserName(e);
-                await e.Channel.SendMessage(String.Format("*{0}* tries their luck at the slot machine...", user));
+                string output = "";
+
+                output += String.Format("*{0}* tries their luck at the slot machine... \n", user);
 
                 Random rand = new Random(new Random().Next(10000));
                 var enum1 = GetRandomOutcome(rand);
                 var enum2 = GetRandomOutcome(rand);
                 var enum3 = GetRandomOutcome(rand);
-                await e.Channel.SendMessage(String.Format(":{0}: - :{1}: - :{2}:", enum1, enum2, enum3));
+                output += String.Format(":{0}: - :{1}: - :{2}: \n", enum1, enum2, enum3);
                 
                 if (enum1.Equals(enum2) && enum2.Equals(enum3))
                 {
                     payout = bet * 10;
-                    await e.Channel.SendMessage(String.Format("*{0}* has hit the jackpot!", user));
-                    await e.Channel.SendMessage(String.Format("Payout: {0} x 10 = *{1}*", bet, payout));
+                    output += String.Format("*{0}* has hit the jackpot! \n", user);
+                    output += String.Format("Payout: {0} x 10 = **{1}**", bet, payout);
                 }
                 else if (enum1.Equals(enum2) || enum2.Equals(enum3) || enum1.Equals(enum3))
                 {
                     payout = bet * 3;
-                    await e.Channel.SendMessage(String.Format("Payout: {0} x 3 = *{1}*", bet, payout));
+                    output += String.Format("Payout: {0} x 3 = *{1}*", bet, payout);
                 }
                 else
                 {
-                    await e.Channel.SendMessage(String.Format("Better luck next time, *{0}*...", user));
+                    output += String.Format("Better luck next time, *{0}*...", user);
                 }
 
                 gambler.RemoveCash(bet);
                 gambler.AddCash(payout);
+                await e.Channel.SendMessage(output);
             }
             catch (FormatException)
             {

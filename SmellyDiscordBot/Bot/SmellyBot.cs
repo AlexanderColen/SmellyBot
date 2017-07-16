@@ -284,29 +284,32 @@ namespace SmellyDiscordBot
             {
                 string output = "Commands regarding League of Legends. (NOTE: Lowercase is key!)"
                                 + "``` \n"
-                                + "Command".PadRight(35) + "Description".PadRight(75) + "Example" + "\n" + "\n"
-                                + String.Format("{0}level <region> <summoner>", Properties.Default.prefix).PadRight(35)
+                                + "Command".PadRight(45) + "Description".PadRight(75) + "Example" + "\n" + "\n"
+                                + String.Format("{0}level <region> <summoner>", Properties.Default.prefix).PadRight(45)
                                                 + "Shows the level of the summoner in the region.".PadRight(75)
                                                 + String.Format("Example: {0}level euw ChallengerJanna", Properties.Default.prefix) + "\n"
-                                + String.Format("{0}rank <region> <summoner>", Properties.Default.prefix).PadRight(35)
+                                + String.Format("{0}rank <region> <summoner>", Properties.Default.prefix).PadRight(45)
                                                 + "Shows the rank(s) of the summoner in the region.".PadRight(75)
                                                 + String.Format("Example: {0}rank kr hide on bush", Properties.Default.prefix) + "\n"
-                                + String.Format("{0}currentgame <region> <summoner>", Properties.Default.prefix).PadRight(35)
+                                + String.Format("{0}rankedstats <region> <champion> <summoner>", Properties.Default.prefix).PadRight(45)
+                                                + "Shows ranked stats of the summoner in the region for a champion.".PadRight(75)
+                                                + String.Format("Example: {0}rank kr hide on bush", Properties.Default.prefix) + "\n"
+                                + String.Format("{0}currentgame <region> <summoner>", Properties.Default.prefix).PadRight(45)
                                                 + "Displays the current game that the summoner in the region is playing.".PadRight(75)
                                                 + String.Format("Example: {0}currentgame na xxRivenMaster98xx", Properties.Default.prefix) + "\n"
-                                + String.Format("{0}status <region>", Properties.Default.prefix).PadRight(35)
+                                + String.Format("{0}status <region>", Properties.Default.prefix).PadRight(45)
                                                 + "Checks the status of the requested region.".PadRight(75)
                                                 + String.Format("Example: {0}status euw", Properties.Default.prefix) + "\n"
-                                + String.Format("{0}stats <champion>", Properties.Default.prefix).PadRight(35)
+                                + String.Format("{0}stats <champion>", Properties.Default.prefix).PadRight(45)
                                                 + "Fetches information for the champion.".PadRight(75)
                                                 + String.Format("Example: {0}stats Nami", Properties.Default.prefix) + "\n"
-                                + String.Format("{0}counter <champion>", Properties.Default.prefix).PadRight(35)
+                                + String.Format("{0}counter <champion>", Properties.Default.prefix).PadRight(45)
                                                 + "Shows Riot's tips for playing against a certain champion.".PadRight(75)
                                                 + String.Format("Example: {0}counter Draven", Properties.Default.prefix) + "\n"
-                                + String.Format("{0}howto <champion>", Properties.Default.prefix).PadRight(35)
+                                + String.Format("{0}howto <champion>", Properties.Default.prefix).PadRight(45)
                                                 + "Shows Riot's tips for playing a certain champion.".PadRight(75)
                                                 + String.Format("Example: {0}howto Yasuo", Properties.Default.prefix) + "\n"
-                                + String.Format("{0}lore <champion>", Properties.Default.prefix).PadRight(35)
+                                + String.Format("{0}lore <champion>", Properties.Default.prefix).PadRight(45)
                                                 + "Displays the lore of a champion.".PadRight(75)
                                                 + String.Format("Example: {0}lore Teemo", Properties.Default.prefix) + "\n"
                                 + "```";
@@ -721,6 +724,23 @@ namespace SmellyDiscordBot
                     }
 
                     await stats.GetChampionLore(e);
+                }
+                catch (InvalidAPITokenException ex)
+                {
+                    await e.Channel.SendMessage(ex.Message);
+                }
+            });
+
+            commands.CreateCommand("rankedstats").Parameter("message", ParameterType.Multiple).Do(async (e) =>
+            {
+                try
+                {
+                    if (stats == null)
+                    {
+                        stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    }
+
+                    await stats.GetRankedChampStats(e);
                 }
                 catch (InvalidAPITokenException ex)
                 {
