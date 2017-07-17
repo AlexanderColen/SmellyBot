@@ -548,6 +548,7 @@ namespace SmellyDiscordBot
                     await e.Channel.SendMessage(String.Format("You don't have an account at SmellyBank yet. Please register one with {0}startgambling.", Properties.Default.prefix));
                 }
             });
+
             commands.CreateCommand("startgambling").Do(async (e) =>
             {
                 if (this.casino == null)
@@ -564,6 +565,17 @@ namespace SmellyDiscordBot
                 {
                     await e.Channel.SendMessage(String.Format("You already have an account at SmellyBank. You can use {0}checkcash to see your cash.", Properties.Default.prefix));
                 }
+            });
+
+            commands.CreateCommand("leaderboard").Do(async (e) =>
+            {
+                if (this.casino == null)
+                {
+                    this.casino = new Casino();
+                    this.casino.FetchGamblers();
+                }
+
+                await this.casino.Leaderboard(e);
             });
             #region Slot Machine
             commands.CreateCommand("slots").Parameter("message", ParameterType.Required).Do(async (e) =>

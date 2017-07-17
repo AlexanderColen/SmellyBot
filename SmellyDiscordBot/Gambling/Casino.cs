@@ -1,9 +1,13 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using SmellyDiscordBot.Bot;
 using SmellyDiscordBot.Gambling;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -152,12 +156,51 @@ namespace SmellyDiscordBot
         }
 
         /// <summary>
+        /// Returns a leaderboard of the top 5 gamblers.
+        /// </summary>
+        /// <param name="e">The command event which was executed.</param>
+        /// <returns>A message in the channel regarding the top 5 gamblers.
+        /// Server wide if used in a server, across all servers if used in a private message to the bot.</returns>
+        public async Task Leaderboard(CommandEventArgs e)
+        {
+            string output = "";
+
+            //Overal leaderboard.
+            if (e.Server == null)
+            {
+                output = "**Top 5 Gamblers Across All Servers**" + "\n" + "```" + "\n";
+                output = SortGamblers(this.gamblers, output);
+            }
+            //Server specific leaderboard.
+            else
+            {
+                output = String.Format("**Top 5 Gamblers in {0}**", e.Server.Name) + "\n" + "```" + "\n";
+                List<Gambler> serverGamblers = new List<Gambler>();
+
+                //Get all gamblers from this server and throw them in the list.
+                foreach (Gambler g in this.gamblers)
+                {
+                    foreach (User u in e.Server.Users)
+                    {
+                        if (u.Name == g.GetName())
+                        {
+                            serverGamblers.Add(g);
+                            break;
+                        }
+                    }
+                }
+
+                output = SortGamblers(serverGamblers, output);
+            }
+
+            await e.Channel.SendMessage(output);
+        }
+
+        /// <summary>
         /// Fakes a slot machine with emojis to the user.
         /// </summary>
         /// <param name="e">The command event which was executed.</param>
-        /// <returns>A message in the channel that specifies which user tried to spin, 
-        /// another one with the outcome of the spin, 
-        /// and a final message that says something about the outcome.</returns>
+        /// <returns>A message in the channel that shows the spin of the slotmachine and the outcome of it.</returns>
         public async Task Slots(CommandEventArgs e)
         {
             try
@@ -271,6 +314,49 @@ namespace SmellyDiscordBot
                 Console.WriteLine(ex.Message);
                 await e.Channel.SendMessage("Something went wrong that shouldn't have went wrong...");
             }
+        }
+
+        /// <summary>
+        /// Sorts the list of Gambler objects and outputs a string back with the result.
+        /// </summary>
+        /// <param name="gamblers">The list of Gambler objects that needs to be sorted.</param>
+        /// <param name="output">The message that will be sent to the channel.</param>
+        /// <returns>The output with the top 5 gamblers from the given list.</returns>
+        private string SortGamblers(List<Gambler> gamblers, string output)
+        {
+            IOrderedDictionary allGamblers = new OrderedDictionary();
+
+            //Throw all gamblers in there.
+            foreach (Gambler g in gamblers)
+            {
+                allGamblers.Add(g.GetName(), g.GetCash());
+            }
+
+            //Sort it and throw it in a normal dictionary. (ADDING ANYTHING AFTER THIS WILL MAKE IT UNORDERED AGAIN.)
+            var topGamblers = allGamblers.Cast<DictionaryEntry>()
+                               .OrderBy(r => r.Value)
+                               .ToDictionary(c => c.Key, d => d.Value);
+
+            //Output the top 5 gamblers.
+
+            int count = 0;
+            //Reverse dictionary to order descending.
+            foreach (var entry in topGamblers.Reverse())
+            {
+                if (count >= 5)
+                {
+                    break;
+                }
+                else
+                {
+                    output += String.Format("{0} - {1}", entry.Key, entry.Value) + "\n";
+                    count++;
+                }
+            }
+
+            output += "```";
+
+            return output;
         }
     }
 }
