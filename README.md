@@ -1,4 +1,4 @@
-# SmellyBot v0.10
+# SmellyBot v0.11
 ---
 ## Introduction
 This is SmellyBot, my personal Discord bot that I am working on developing for use within some servers. 
