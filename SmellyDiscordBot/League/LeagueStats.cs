@@ -509,28 +509,29 @@ namespace SmellyDiscordBot.League
         /// <returns>A message in the channel with stats regarding the requested summoner in the region on the specified champion.</returns>
         public async Task GetRankedChampStats(CommandEventArgs e)
         {
-            var input = Utils.ReturnInputParameterStringArray(e);
-            string regionString = input[0];
-            string championName = input[1];
-            string summonerName = "";
-
-            if (input.Length == 3)
-            {
-                summonerName = input[2];
-            }
-            else
-            {
-                summonerName = input[2];
-                for (int i = 3; i < input.Length; i++)
-                {
-                    summonerName = String.Format("{0} {1}", summonerName, input[i]);
-                }
-            }
-
             Summoner summoner = null;
 
             try
             {
+                var input = Utils.ReturnInputParameterStringArray(e);
+                string regionString = input[0];
+                string championName = input[1];
+                string summonerName = "";
+
+                if (input.Length == 3)
+                {
+                    summonerName = input[2];
+                }
+                else
+                {
+                    summonerName = input[2];
+                    for (int i = 3; i < input.Length; i++)
+                    {
+                        summonerName = String.Format("{0} {1}", summonerName, input[i]);
+                    }
+                }
+
+
                 Region region = GetRegion(regionString);
                 ChampionStatic champ = GetChampion(region, championName);
 
@@ -541,18 +542,18 @@ namespace SmellyDiscordBot.League
 
                 summoner = GetSummoner(regionString, summonerName);
 
-                string output = String.Format("Ranked statistics for **{0}** on **{1}** \n ```", summoner.Name, champ.Name); 
+                string output = String.Format("Ranked statistics for **{0}** on **{1}** \n ```", summoner.Name, champ.Name);
 
                 List<RiotSharp.StatsEndpoint.ChampionStats> champStats = await api.GetStatsRankedAsync(region, summoner.Id);
-                
+
                 foreach (RiotSharp.StatsEndpoint.ChampionStats stat in champStats)
                 {
                     if (stat.ChampionId == champ.Id)
                     {
-                        decimal avgKills = (decimal) stat.Stats.TotalChampionKills / stat.Stats.TotalSessionsPlayed;
-                        decimal avgDeaths = (decimal) stat.Stats.TotalDeathsPerSession / stat.Stats.TotalSessionsPlayed;
-                        decimal avgAssists = (decimal) stat.Stats.TotalAssists / stat.Stats.TotalSessionsPlayed;
-                        decimal avgWinrate = (decimal) stat.Stats.TotalSessionsWon / stat.Stats.TotalSessionsPlayed * 100;
+                        decimal avgKills = (decimal)stat.Stats.TotalChampionKills / stat.Stats.TotalSessionsPlayed;
+                        decimal avgDeaths = (decimal)stat.Stats.TotalDeathsPerSession / stat.Stats.TotalSessionsPlayed;
+                        decimal avgAssists = (decimal)stat.Stats.TotalAssists / stat.Stats.TotalSessionsPlayed;
+                        decimal avgWinrate = (decimal)stat.Stats.TotalSessionsWon / stat.Stats.TotalSessionsPlayed * 100;
 
                         int avgDmgDealt = stat.Stats.TotalDamageDealt / stat.Stats.TotalSessionsPlayed;
                         int avgDmgTaken = stat.Stats.TotalDamageTaken / stat.Stats.TotalSessionsPlayed;
@@ -582,7 +583,7 @@ namespace SmellyDiscordBot.League
                     }
                 }
                 output += "```";
-                
+
                 await e.Channel.SendMessage(output);
             }
             catch (IndexOutOfRangeException)
@@ -593,6 +594,67 @@ namespace SmellyDiscordBot.League
             {
                 Console.WriteLine(ex.Message);
                 await e.Channel.SendMessage(String.Format("{0} hasn't played any ranked this season.", summoner.Name));
+            }
+            catch (Exception ex) when (ex is SummonerNotFoundException || ex is RegionNotFoundException || ex is ChampionNotFoundException)
+            {
+                await e.Channel.SendMessage(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Calculates the winrate of the given summoner from their ranked games.
+        /// </summary>
+        /// <param name="e">The command event which was executed.</param>
+        /// <returns>A message in the channel with the winrate across all champions for the summoner.</returns>
+        public async Task GetRankedWinrate(CommandEventArgs e)
+        {
+            Summoner summoner = null;
+
+            try
+            {
+                var input = Utils.ReturnInputParameterStringArray(e);
+                string regionString = input[0];
+                string summonerName = "";
+
+                if (input.Length == 2)
+                {
+                    summonerName = input[1];
+                }
+                else
+                {
+                    summonerName = input[1];
+                    for (int i = 2; i < input.Length; i++)
+                    {
+                        summonerName = String.Format("{0} {1}", summonerName, input[i]);
+                    }
+                }
+
+
+                summoner = GetSummoner(regionString, summonerName);
+                Region region = GetRegion(regionString);
+
+                List<RiotSharp.StatsEndpoint.ChampionStats> champStats = await api.GetStatsRankedAsync(region, summoner.Id);
+                int totalSessionsPlayed = 0;
+                int totalSessionsWon = 0;
+
+                foreach (RiotSharp.StatsEndpoint.ChampionStats stat in champStats)
+                {
+                    totalSessionsPlayed += stat.Stats.TotalSessionsPlayed;
+                    totalSessionsWon += stat.Stats.TotalSessionsWon;
+                }
+
+                decimal winrate = (decimal)totalSessionsWon / totalSessionsPlayed * 100;
+
+                string output = String.Format("**{0}**'s winrate in ranked this season is *{1}*.", summoner.Name, decimal.Round(winrate, 2).ToString(System.Globalization.CultureInfo.InvariantCulture));
+                await e.Channel.SendMessage(output);
+            }
+            catch (IndexOutOfRangeException)
+            {
+                await Utils.InproperCommandUsageMessage(e, "winrate", "winrate <REGION> <SUMMONER>");
+            }
+            catch (RiotSharpException ex)
+            {
+                Console.WriteLine(ex.Message);
             }
             catch (Exception ex) when (ex is SummonerNotFoundException || ex is RegionNotFoundException || ex is ChampionNotFoundException)
             {

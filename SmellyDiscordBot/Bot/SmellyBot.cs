@@ -293,7 +293,10 @@ namespace SmellyDiscordBot
                                                 + String.Format("Example: {0}rank kr hide on bush", Properties.Default.prefix) + "\n"
                                 + String.Format("{0}rankedstats <region> <champion> <summoner>", Properties.Default.prefix).PadRight(45)
                                                 + "Shows ranked stats of the summoner in the region for a champion.".PadRight(75)
-                                                + String.Format("Example: {0}rank kr hide on bush", Properties.Default.prefix) + "\n"
+                                                + String.Format("Example: {0}rankedstats na draven DravenMasterX", Properties.Default.prefix) + "\n"
+                                + String.Format("{0}winrate <region> <summoner>", Properties.Default.prefix).PadRight(45)
+                                                + "Shows ranked winrate of the summoner in the region.".PadRight(75)
+                                                + String.Format("Example: {0}winrate eune Argloud", Properties.Default.prefix) + "\n"
                                 + String.Format("{0}currentgame <region> <summoner>", Properties.Default.prefix).PadRight(45)
                                                 + "Displays the current game that the summoner in the region is playing.".PadRight(75)
                                                 + String.Format("Example: {0}currentgame na xxRivenMaster98xx", Properties.Default.prefix) + "\n"
@@ -753,6 +756,23 @@ namespace SmellyDiscordBot
                     }
 
                     await stats.GetRankedChampStats(e);
+                }
+                catch (InvalidAPITokenException ex)
+                {
+                    await e.Channel.SendMessage(ex.Message);
+                }
+            });
+
+            commands.CreateCommand("winrate").Parameter("message", ParameterType.Multiple).Do(async (e) =>
+            {
+                try
+                {
+                    if (stats == null)
+                    {
+                        stats = new LeagueStats(Properties.Default.riotAPIkey);
+                    }
+
+                    await stats.GetRankedWinrate(e);
                 }
                 catch (InvalidAPITokenException ex)
                 {
