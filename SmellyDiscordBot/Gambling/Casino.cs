@@ -59,7 +59,7 @@ namespace SmellyDiscordBot
             }
             catch (IOException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(String.Format("Fetch gamblers - {0}", ex.Message));
             }
             finally
             {
@@ -110,7 +110,7 @@ namespace SmellyDiscordBot
             }
             catch (IOException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(String.Format("Write all gamblers - {0}", ex.Message));
             }
             finally
             {
@@ -275,7 +275,7 @@ namespace SmellyDiscordBot
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(String.Format("Slots - {0}", ex.Message));
                 await e.Channel.SendMessage("Something went wrong that shouldn't have went wrong...");
             }
         }
@@ -306,12 +306,12 @@ namespace SmellyDiscordBot
             }
             catch (Exception ex) when (ex is UnusedParametersException || ex is ArgumentException || ex is FormatException)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(String.Format("Random Roll - {0}", ex.Message));
                 await Utils.InproperCommandUsageMessage(e, "roll", "!roll <MINVALUE>-<MAXVALUE>");
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(String.Format("Random Roll - {0}", ex.Message));
                 await e.Channel.SendMessage("Something went wrong that shouldn't have went wrong...");
             }
         }

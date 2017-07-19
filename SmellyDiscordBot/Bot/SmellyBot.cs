@@ -114,12 +114,12 @@ namespace SmellyDiscordBot
             }
             catch (Exception ex) when (ex is UnusedParametersException || ex is IndexOutOfRangeException)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(String.Format("Toggle Events - {0}", ex.Message));
                 await Utils.InproperCommandUsageMessage(e, "toggle<EVENT>", "!toggle<EVENT> <CHANNELNAME> <CHANNELNAME>");
             }
             catch (Exception uee)
             {
-                Console.WriteLine(uee.Message);
+                Console.WriteLine(String.Format("Toggle Events - {0}", uee.Message));
                 await e.Channel.SendMessage("Something went wrong that shouldn't have went wrong...");
             }
         }
@@ -161,12 +161,12 @@ namespace SmellyDiscordBot
             }
             catch (DuplicateCommandException dce)
             {
-                Console.WriteLine(dce.Message);
+                Console.WriteLine(String.Format("Add Command - {0}", dce.Message));
                 await e.Channel.SendMessage(dce.Message);
             }
             catch (UnusedParametersException upe)
             {
-                Console.WriteLine(upe.Message);
+                Console.WriteLine(String.Format("Add Command - {0}", upe.Message));
                 await Utils.InproperCommandUsageMessage(e, "addcommand", "!addcommand <NAME> <RESPONSE>");
             }
         }
@@ -190,6 +190,7 @@ namespace SmellyDiscordBot
         {
             commands.CreateCommand(command).Do(async (e) =>
             {
+                Console.WriteLine(String.Format("Added new '{0}' command with '{1}' as the response.", command, response));
                 await e.Channel.SendMessage(response);
             });
         }
@@ -447,6 +448,7 @@ namespace SmellyDiscordBot
                 if (e.User.ServerPermissions.Administrator)
                 {
                     Properties.Default.Save();
+                    Console.WriteLine("Property changes saved.");
                     await e.Channel.SendMessage("The changes to the settings file were saved!");
                 }
                 else
@@ -475,14 +477,15 @@ namespace SmellyDiscordBot
             #region Set SmellyBot's Game
             commands.CreateCommand("setgame").Parameter("message", ParameterType.Multiple).Do(async (e) =>
             {
-                if (e.User.ServerPermissions.Administrator)
+            if (e.User.ServerPermissions.Administrator)
+            {
+                string game = "";
+                foreach (string s in Utils.ReturnInputParameterStringArray(e))
                 {
-                    string game = "";
-                    foreach (string s in Utils.ReturnInputParameterStringArray(e))
-                    {
-                        game += s.PadRight(1);
-                    }
-                    client.SetGame(game);
+                    game += s.PadRight(1);
+                }
+                client.SetGame(game);
+                Console.WriteLine(String.Format("Changed status to {0}", game));
                 }
                 else
                 {
@@ -623,6 +626,7 @@ namespace SmellyDiscordBot
                 }
                 catch (InvalidAPITokenException ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await e.Channel.SendMessage(ex.Message);
                 }
             });
@@ -640,6 +644,7 @@ namespace SmellyDiscordBot
                 }
                 catch (InvalidAPITokenException ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await e.Channel.SendMessage(ex.Message);
                 }
             });
@@ -657,6 +662,7 @@ namespace SmellyDiscordBot
                 }
                 catch (InvalidAPITokenException ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await e.Channel.SendMessage(ex.Message);
                 }
             });
@@ -674,6 +680,7 @@ namespace SmellyDiscordBot
                 }
                 catch (InvalidAPITokenException ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await e.Channel.SendMessage(ex.Message);
                 }
             });
@@ -691,6 +698,7 @@ namespace SmellyDiscordBot
                 }
                 catch (InvalidAPITokenException ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await e.Channel.SendMessage(ex.Message);
                 }
             });
@@ -708,6 +716,7 @@ namespace SmellyDiscordBot
                 }
                 catch (InvalidAPITokenException ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await e.Channel.SendMessage(ex.Message);
                 }
             });
@@ -725,6 +734,7 @@ namespace SmellyDiscordBot
                 }
                 catch (InvalidAPITokenException ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await e.Channel.SendMessage(ex.Message);
                 }
             });
@@ -742,6 +752,7 @@ namespace SmellyDiscordBot
                 }
                 catch (InvalidAPITokenException ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await e.Channel.SendMessage(ex.Message);
                 }
             });
@@ -759,6 +770,7 @@ namespace SmellyDiscordBot
                 }
                 catch (InvalidAPITokenException ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await e.Channel.SendMessage(ex.Message);
                 }
             });
@@ -776,6 +788,7 @@ namespace SmellyDiscordBot
                 }
                 catch (InvalidAPITokenException ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await e.Channel.SendMessage(ex.Message);
                 }
             });

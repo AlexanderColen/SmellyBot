@@ -68,11 +68,12 @@ namespace SmellyDiscordBot.League
             }
             catch (Exception ex) when (ex is RiotSharpException || ex is IndexOutOfRangeException)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(String.Format("Get summoner level - {0}", ex.Message));
                 await Utils.InproperCommandUsageMessage(e, "level", "level <REGION> <SUMMONERNAME>");
             }
             catch (Exception ex) when (ex is SummonerNotFoundException || ex is RegionNotFoundException)
             {
+                Console.WriteLine(String.Format("Get summoner level - {0}", ex.Message));
                 await e.Channel.SendMessage(ex.Message);
             }
         }
@@ -126,11 +127,12 @@ namespace SmellyDiscordBot.League
             }
             catch (RiotSharpException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(String.Format("Get summoner rank - {0}", ex.Message));
                 await e.Channel.SendMessage(String.Format("*{0}* is **Unranked**.", summoner.Name));
             }
             catch (Exception ex) when (ex is SummonerNotFoundException || ex is RegionNotFoundException)
             {
+                Console.WriteLine(String.Format("Get summoner rank - {0}", ex.Message));
                 await e.Channel.SendMessage(ex.Message);
             }
         }
@@ -229,7 +231,7 @@ namespace SmellyDiscordBot.League
             }
             catch (RiotSharpException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(String.Format("Get current game - {0}", ex.Message));
                 await e.Channel.SendMessage("This Summoner is currently not in a game.");
             }
             catch (IndexOutOfRangeException)
@@ -238,6 +240,7 @@ namespace SmellyDiscordBot.League
             }
             catch (Exception ex) when (ex is SummonerNotFoundException || ex is RegionNotFoundException)
             {
+                Console.WriteLine(String.Format("Get current game - {0}", ex.Message));
                 await e.Channel.SendMessage(ex.Message);
             }
         }
@@ -268,11 +271,12 @@ namespace SmellyDiscordBot.League
             }
             catch (RiotSharpException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(String.Format("Get server status - {0}", ex.Message));
                 await e.Channel.SendMessage("Something went wrong that shouldn't have gone wrong...");
             }
             catch (RegionNotFoundException ex)
             {
+                Console.WriteLine(String.Format("Get server status - {0}", ex.Message));
                 await e.Channel.SendMessage(ex.Message);
             }
         }
@@ -372,11 +376,11 @@ namespace SmellyDiscordBot.League
             }
             catch (RiotSharpException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(String.Format("Get champion stats - {0}", ex.Message));
             }
             catch (IndexOutOfRangeException)
             {
-                await Utils.InproperCommandUsageMessage(e, "champion", "chmapion <REGION> <CHAMPIONNAME>");
+                await Utils.InproperCommandUsageMessage(e, "champion", "champion <REGION> <CHAMPIONNAME>");
             }
             catch (NullReferenceException)
             {
@@ -408,7 +412,7 @@ namespace SmellyDiscordBot.League
             }
             catch (RiotSharpException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(String.Format("Get champion counter - {0}", ex.Message));
             }
             catch (IndexOutOfRangeException)
             {
@@ -444,7 +448,7 @@ namespace SmellyDiscordBot.League
             }
             catch (RiotSharpException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(String.Format("Get champion tips - {0}", ex.Message));
             }
             catch (IndexOutOfRangeException)
             {
@@ -490,7 +494,7 @@ namespace SmellyDiscordBot.League
             }
             catch (RiotSharpException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(String.Format("Get champion lore - {0}", ex.Message));
             }
             catch (IndexOutOfRangeException)
             {
@@ -592,11 +596,12 @@ namespace SmellyDiscordBot.League
             }
             catch (RiotSharpException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(String.Format("Get ranked champ stats - {0}", ex.Message));
                 await e.Channel.SendMessage(String.Format("{0} hasn't played any ranked this season.", summoner.Name));
             }
             catch (Exception ex) when (ex is SummonerNotFoundException || ex is RegionNotFoundException || ex is ChampionNotFoundException)
             {
+                Console.WriteLine(String.Format("Get ranked champ stats - {0}", ex.Message));
                 await e.Channel.SendMessage(ex.Message);
             }
         }
@@ -654,10 +659,11 @@ namespace SmellyDiscordBot.League
             }
             catch (RiotSharpException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(String.Format("Get ranked winrate - {0}", ex.Message));
             }
             catch (Exception ex) when (ex is SummonerNotFoundException || ex is RegionNotFoundException || ex is ChampionNotFoundException)
             {
+                Console.WriteLine(String.Format("Get ranked winrate - {0}", ex.Message));
                 await e.Channel.SendMessage(ex.Message);
             }
         }
