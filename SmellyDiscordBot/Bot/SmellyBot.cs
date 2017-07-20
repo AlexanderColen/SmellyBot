@@ -200,13 +200,6 @@ namespace SmellyDiscordBot
         /// </summary>
         private void AddAllCommands()
         {
-            #region Basic Commands With Responses
-            #region Dokus
-            AddCommand("Dokus", "Did you mean yourself?");
-            AddCommand("dokus", "Did you mean yourself?");
-            AddCommand("DOKUS", "No need to yell, dokus!");
-            #endregion
-            #endregion
             #region Help Commands
             commands.CreateCommand("help").Do(async (e) =>
             {
