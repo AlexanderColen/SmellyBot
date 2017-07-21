@@ -112,10 +112,58 @@ namespace SmellyDiscordBot.League
 
                 foreach (RiotSharp.LeagueEndpoint.League league in summoner.GetLeagues())
                 {
-                    output += string.Format("\n {0} - {1} - {2}",
-                                                league.Tier.ToString().PadRight(10),
-                                                league.Name.ToString().PadRight(25),
-                                                league.Queue);
+                    string queue = "";
+
+                    #region Queue Switch
+                    switch (league.Queue)
+                    {
+                        case Queue.RankedSolo5x5:
+                            queue = "SoloQ";
+                            break;
+                        case Queue.RankedFlexSR:
+                            queue = "5v5 Flex";
+                            break;
+                        case Queue.RankedFlexTT:
+                            queue = "3v3 Flex";
+                            break;
+                        case Queue.RankedPremade3x3:
+                            queue = "3v3 Premade";
+                            break;
+                        case Queue.RankedPremade5x5:
+                            queue = "5v5 Premade";
+                            break;
+                        case Queue.RankedTeam3x3:
+                            queue = "3v3 Team";
+                            break;
+                        case Queue.RankedTeam5x5:
+                            queue = "5v5 Team";
+                            break;
+                        case Queue.TeamBuilderDraftRanked5x5:
+                            queue = "5v5 Dynamic Queue";
+                            break;
+                        case Queue.TeamBuilderRankedSolo:
+                            queue = "SoloQ";
+                            break;
+                        default:
+                            queue = league.Queue.ToString();
+                            break;
+                    }
+                    #endregion
+
+                    RiotSharp.LeagueEndpoint.LeagueEntry entry = league.Entries[0];
+
+                    decimal winrate = (decimal)entry.Wins / (entry.Wins + entry.Losses) * 100;
+
+                    output += string.Format("\n {0} - {1} {2} - {3}LP - {4}-{5} Win/Loss ({6}% Winrate) - {7}",
+                                                queue,
+                                                league.Tier,
+                                                entry.Division,
+                                                entry.LeaguePoints,
+                                                entry.Wins,
+                                                entry.Losses,
+                                                decimal.Round(winrate, 2).ToString(System.Globalization.CultureInfo.InvariantCulture),
+                                                league.Name
+                                                );
                 }
                 output += "```";
 
